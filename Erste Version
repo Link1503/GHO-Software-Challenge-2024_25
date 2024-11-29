@@ -1,0 +1,132 @@
+ long startTime = System.currentTimeMillis();                                              // zum 
+ 
+   	log.info("Es wurde ein Zug von {} angefordert.", gameState.getCurrentTeam());
+   	
+   	
+   	int         Menge_an_Karrotten   = gameState.getCurrentPlayer().getCarrots();
+   	
+   	int         Eigne_Position       = gameState.getCurrentPlayer().getPosition();
+   	
+   	int         Gegner_Position      = gameState.getOtherPlayer().getPosition();
+   	
+   	int         Nächter_Markt        = gameState.getBoard().getNextField(Field.MARKET, Eigne_Position);
+   	
+   	int         Nächter_Salat        = gameState.getBoard().getNextField(Field.SALAD, Eigne_Position);
+   	
+   	int         Dist_Salat			     = Nächter_Salat  - Eigne_Position;
+   	
+   	int			    Dist_Markt		   	   = Nächter_Markt  - Eigne_Position;
+   	
+   	int         Nächter_Igel         = 0;
+   	
+   	int			    Nächter_Hase		     = 0;
+   	
+   	int         Dist                 = GameRuleLogic.INSTANCE.calculateMoveableFields(Menge_an_Karrotten);
+    
+   	Field       Eigne_FeldTyp        = gameState.getBoard().getField(gameState.getCurrentPlayer().getPosition());
+   	
+   	Field       Gegner_FeldTyp       = gameState.getBoard().getField(gameState.getOtherPlayer().getPosition());
+   	
+   	List<Move>  Mögliche_Züge        = gameState.getSensibleMoves();
+    	 
+   	int         Move                 = 0;
+   	
+   	
+                                    
+   	
+   
+    
+   if (Dist_Markt  <  Dist   &&  Gegner_Position != Nächter_Markt ){
+		 
+    	int Nicht_begebare_Felder = 0;
+    	
+        Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position);
+		Nächter_Hase = gameState.getBoard().getNextField(Field.HARE, Eigne_Position);
+		
+		
+    while (Nächter_Igel < Nächter_Markt || Nächter_Hase < Nächter_Markt ) {
+    		
+    	if (Nächter_Igel < Nächter_Markt ) {
+    		
+    		Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
+    		
+    		Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Nächter_Igel);    		
+    	     }
+    	
+        if (Nächter_Hase < Nächter_Markt) {
+    		
+    		Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
+    		
+    		Nächter_Hase = gameState.getBoard().getNextField(Field.HARE, Nächter_Hase );			
+    	     }  
+         }
+    	
+   if (Gegner_Position < Nächter_Markt &&  Gegner_FeldTyp != Field.HEDGEHOG && Gegner_FeldTyp != Field.HARE ) {
+    	
+    	Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
+   }	
+    	
+   		Move = Dist_Markt - Nicht_begebare_Felder;
+   		
+   		System.out.println(Move);	
+  }
+    
+    /*
+    if (Dist_Salat  <  (GameRuleLogic.INSTANCE.calculateMoveableFields(Menge_an_Karrotten) ) &&  Gegner_Position != Nächter_Salat  ){
+		 
+    	int Nicht_begebare_Felder = 0;
+    	
+    	while (  Nächter_Igel < Nächter_Salat || Nächter_Hase < Nächter_Salat ) {
+    		
+    		Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
+    		
+    		Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Nächter_Igel);
+    		
+    		Nächter_Hase = gameState.getBoard().getNextField(Field.HEDGEHOG, Nächter_Hase);
+    	}
+    	
+        Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position);
+		
+		Nächter_Hase = gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position);
+    	
+   		Move = Dist_Salat - Nicht_begebare_Felder;
+   		
+    }
+   */
+    
+    
+    if (Eigne_FeldTyp == Field.SALAD) {
+    	 
+	     Move = 0;	
+    }
+    
+    
+    
+    
+   
+   			
+   Move move = Mögliche_Züge.get(Move);
+   	
+   
+    		
+    		
+   												 												// Hier intelligente Strategie zur Auswahl des Zuges einfüge
+    	
+    log.info("Sende {} nach {}ms.", move, System.currentTimeMillis() - startTime);
+     
+    System.out.println("Zug: " + gameState.getTurn());
+    System.out.println(move);
+    System.out.println(" ");
+    System.out.println(Mögliche_Züge);
+    System.out.println(" ");
+    System.out.println(Menge_an_Karrotten);
+    System.out.println(" ");
+    System.out.println(Eigne_FeldTyp);
+    System.out.println(" ");
+    System.out.println(Dist_Markt + "/" + GameRuleLogic.INSTANCE.calculateMoveableFields(Menge_an_Karrotten));
+    System.out.println("________________________________________________________________________");
+    
+  
+    
+    
+    return move;
