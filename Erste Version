@@ -1,8 +1,9 @@
- long startTime = System.currentTimeMillis();                                              // zum 
+ // dieser Code wird in die public Move calculateMove() Funktion eingesetzt 
+long startTime = System.currentTimeMillis();                                          // zum messen der Zeit 
  
    	log.info("Es wurde ein Zug von {} angefordert.", gameState.getCurrentTeam());
    	
-   	
+   	//___________________________________________________________________________________________________________   Dieser Abschnit ist nur für die bennenung von einigen Werten, damit es übersichtlicher wird
    	int         Menge_an_Karrotten   = gameState.getCurrentPlayer().getCarrots();
    	
    	int         Eigne_Position       = gameState.getCurrentPlayer().getPosition();
@@ -13,13 +14,13 @@
    	
    	int         Nächter_Salat        = gameState.getBoard().getNextField(Field.SALAD, Eigne_Position);
    	
-   	int         Dist_Salat			     = Nächter_Salat  - Eigne_Position;
+   	int         Dist_Salat	         = Nächter_Salat  - Eigne_Position;													
    	
-   	int			    Dist_Markt		   	   = Nächter_Markt  - Eigne_Position;
+   	int         Dist_Markt		 = Nächter_Markt  - Eigne_Position;
    	
    	int         Nächter_Igel         = 0;
    	
-   	int			    Nächter_Hase		     = 0;
+   	int	    Nächter_Hase         = 0;
    	
    	int         Dist                 = GameRuleLogic.INSTANCE.calculateMoveableFields(Menge_an_Karrotten);
     
@@ -30,7 +31,7 @@
    	List<Move>  Mögliche_Züge        = gameState.getSensibleMoves();
     	 
    	int         Move                 = 0;
-   	
+   	//________________________________________________________________________________________________________________
    	
                                     
    	
@@ -69,50 +70,20 @@
    		Move = Dist_Markt - Nicht_begebare_Felder;
    		
    		System.out.println(Move);	
-  }
-    
-    /*
-    if (Dist_Salat  <  (GameRuleLogic.INSTANCE.calculateMoveableFields(Menge_an_Karrotten) ) &&  Gegner_Position != Nächter_Salat  ){
-		 
-    	int Nicht_begebare_Felder = 0;
-    	
-    	while (  Nächter_Igel < Nächter_Salat || Nächter_Hase < Nächter_Salat ) {
-    		
-    		Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
-    		
-    		Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Nächter_Igel);
-    		
-    		Nächter_Hase = gameState.getBoard().getNextField(Field.HEDGEHOG, Nächter_Hase);
-    	}
-    	
-        Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position);
-		
-		Nächter_Hase = gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position);
-    	
-   		Move = Dist_Salat - Nicht_begebare_Felder;
-   		
-    }
-   */
-    
-    
-    if (Eigne_FeldTyp == Field.SALAD) {
+  }  
+
+
+ if (Eigne_FeldTyp == Field.SALAD) {
     	 
 	     Move = 0;	
-    }
+  }
     
-    
-    
-    
-   
-   			
+    			
    Move move = Mögliche_Züge.get(Move);
    	
    
-    		
-    		
-   												 												// Hier intelligente Strategie zur Auswahl des Zuges einfüge
-    	
-    log.info("Sende {} nach {}ms.", move, System.currentTimeMillis() - startTime);
+
+    log.info("Sende {} nach {}ms.", move, System.currentTimeMillis() - startTime);                       // Zum messen der Zeit                                    
      
     System.out.println("Zug: " + gameState.getTurn());
     System.out.println(move);
@@ -126,7 +97,5 @@
     System.out.println(Dist_Markt + "/" + GameRuleLogic.INSTANCE.calculateMoveableFields(Menge_an_Karrotten));
     System.out.println("________________________________________________________________________");
     
-  
-    
-    
+
     return move;
