@@ -1,89 +1,222 @@
- // dieser Code wird in die public Move calculateMove() Funktion eingesetzt 
-long startTime = System.currentTimeMillis();                                          // zum messen der Zeit 
  
-   	log.info("Es wurde ein Zug von {} angefordert.", gameState.getCurrentTeam());
-   	
-   	//___________________________________________________________________________________________________________   Dieser Abschnit ist nur für die bennenung von einigen Werten, damit es übersichtlicher wird
-   	int         Menge_an_Karrotten   = gameState.getCurrentPlayer().getCarrots();
-   	
-   	int         Eigne_Position       = gameState.getCurrentPlayer().getPosition();
-   	
-   	int         Gegner_Position      = gameState.getOtherPlayer().getPosition();
-   	
-   	int         Nächter_Markt        = gameState.getBoard().getNextField(Field.MARKET, Eigne_Position);
-   	
-   	int         Nächter_Salat        = gameState.getBoard().getNextField(Field.SALAD, Eigne_Position);
-   	
-   	int         Dist_Salat	         = Nächter_Salat  - Eigne_Position;													
-   	
-   	int         Dist_Markt		 = Nächter_Markt  - Eigne_Position;
-   	
-   	int         Nächter_Igel         = 0;
-   	
-   	int	    Nächter_Hase         = 0;
-   	
-   	int         Dist                 = GameRuleLogic.INSTANCE.calculateMoveableFields(Menge_an_Karrotten);
+	  long startTime = System.currentTimeMillis();                                          // zum messen der Zeit 
+	   
+	     	log.info("Es wurde ein Zug von {} angefordert.", gameState.getCurrentTeam());
+	     	
+	     	
+	     	
+	        
+            //  Dieser Abschnit ist nur für die bennenung und berechnung von einigen Werten, damit es übersichtlicher wird
+	     	
+	     	
+	     	/*-----------------------------------------------------------------------------------------------------------------------------*/
+	     	
+	     	
+	     	int         Menge_an_Karrotten   = gameState.getCurrentPlayer().getCarrots();
+	     	
+	     	int         Eigne_Position       = gameState.getCurrentPlayer().getPosition();
+	     	
+	     	int         Gegner_Position      = gameState.getOtherPlayer().getPosition();
+	     	
+	     	int         Nächter_Markt        = gameState.getBoard().getNextField(Field.MARKET, Eigne_Position);
+	     	
+	     	int         Nächter_Salat        = gameState.getBoard().getNextField(Field.SALAD, Eigne_Position);
+	     	
+	     	int         Dist_Salat	         = Nächter_Salat  - Eigne_Position;													
+	     	
+	     	int         Dist_Markt		 = Nächter_Markt  - Eigne_Position;
+	     	
+	     	int         Nächter_Igel         = 0;
+	     	
+	     	int	    Nächter_Hase         = 0;
+	     	
+	     	int         Dist                 = GameRuleLogic.INSTANCE.calculateMoveableFields(Menge_an_Karrotten);
+	      
+	     	Field       Eigne_FeldTyp        = gameState.getBoard().getField(gameState.getCurrentPlayer().getPosition());
+	     	
+	     	Field       Gegner_FeldTyp       = gameState.getBoard().getField(gameState.getOtherPlayer().getPosition());
+	     	
+	     	List<Move>  Mögliche_Züge        = gameState.getSensibleMoves();
+	      	 
+	     	int         Move                 = 0;
+	     	
+
+	                                      
+	     	int Karten_Typ[] = new int[4];
+	     	
+	     	List Karten;
+
+	       Karten = gameState.getCurrentPlayer().getCards();
+
+	       	// hier wird die menge der Karten die man bestitzt berechnenet 
+	       
+	        for (int i = 0; i < Karten.size(); i++) {
+
+	            if (Karten.get(i).toString().equals("EAT_SALAD")) {
+	            	Karten_Typ[0] = Karten_Typ[0] + 1;
+	            	//Salatferessen
+	            }
+	            if (Karten.get(i).toString().equals("SWAP_CARROTS")) {
+	            	Karten_Typ[1] = Karten_Typ[1] + 1;
+	            	//Karottentausch
+	            }
+	            if (Karten.get(i).toString().equals("HURRY_AHEAD")) {
+	            	Karten_Typ[2] = Karten_Typ[2] + 1;
+	            	//Vorrücken
+	            }
+	            if (Karten.get(i).toString().equals("FALL_BACK")) {
+	            	Karten_Typ[3] = Karten_Typ[3] + 1;
+	            	//Zurückfallen
+	            }
+
+	            
+	                
+	        }
+	        
+	        
+	        int         Karten_ings          = Karten_Typ[0] + Karten_Typ[1] + Karten_Typ[2] + Karten_Typ[3];
+
+	        int Gegner_Karten_Typ[] = new int[4];
+	        
+	     	List Gegner_Karten;
+
+	       Karten = gameState.getOtherPlayer().getCards();
+	       
+	       // hier wird die menge der Karten die der Gegner bestitzt berechnenet 
+
+	        for (int i = 0; i < Karten.size(); i++) {
+
+	            if (Karten.get(i).toString().equals("EAT_SALAD")) {
+	            	Gegner_Karten_Typ[0] = Gegner_Karten_Typ[0] + 1;
+	            	//Saladfressen
+	            }
+	            if (Karten.get(i).toString().equals("SWAP_CARROTS")) {
+	            	Gegner_Karten_Typ[1] = Gegner_Karten_Typ[1] + 1;
+	            	//Karottentausch
+	            }
+	            if (Karten.get(i).toString().equals("HURRY_AHEAD")) {
+	            	Gegner_Karten_Typ[2] = Gegner_Karten_Typ[2] + 1;
+	            	//Vorrücken
+	            }
+	            if (Karten.get(i).toString().equals("FALL_BACK")) {
+	            	Gegner_Karten_Typ[3] = Gegner_Karten_Typ[3] + 1;
+	            	//Zurückfallen
+	            }
+
+	            
+	                
+	        }
+	        
+	        int         Gegner_Karten_ings          = Gegner_Karten_Typ[0] + Gegner_Karten_Typ[1] + Gegner_Karten_Typ[2] + Gegner_Karten_Typ[3];
+	        
+	        
+	        /*-------------------------------------------------------------------------------------------------------------------------------------*/
+	        
+
+	        
+	     // Ab hier beginnt die eigendlich berechnug des Zuges 
+	      
+	     if (Dist_Markt  <  Dist   &&  Gegner_Position != Nächter_Markt && Nächter_Markt < Nächter_Salat){
+	  		 
+	    	 // Hier wird der Nächste Markt angesteuert und berechnet wie viele Felder zwischen dem Markt und dem Player nicht begebar sind 
+	    	 
+	      	int Nicht_begebare_Felder = 0;
+	      	
+	          Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position);
+	  		Nächter_Hase = gameState.getBoard().getNextField(Field.HARE, Eigne_Position);
+	  		
+	  		
+	      while (Nächter_Igel < Nächter_Markt || Nächter_Hase < Nächter_Markt  && Karten_ings == 0  ) {
+	      		
+	      	if (Nächter_Igel < Nächter_Markt ) {
+	      		
+	      		Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
+	      		
+	      		Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Nächter_Igel);    		
+	      	     }
+	      	
+	          if (Nächter_Hase < Nächter_Markt && Karten_ings == 0  ) {
+	 		      
+	        	  
+	        		  Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
+	        	   
+	      		Nächter_Hase = gameState.getBoard().getNextField(Field.HARE, Nächter_Hase );			
+	      	     }  
+	           }
+	      	
+	     if ( Gegner_Position < Nächter_Markt && Eigne_Position < Gegner_Position && Gegner_FeldTyp != Field.HEDGEHOG && Gegner_FeldTyp != Field.HARE ) {
+	      	
+	      	Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
+	     }	
+	      	
+	     		Move = Dist_Markt - Nicht_begebare_Felder;
+	     		
+	     		
+	    }  
+
     
-   	Field       Eigne_FeldTyp        = gameState.getBoard().getField(gameState.getCurrentPlayer().getPosition());
-   	
-   	Field       Gegner_FeldTyp       = gameState.getBoard().getField(gameState.getOtherPlayer().getPosition());
-   	
-   	List<Move>  Mögliche_Züge        = gameState.getSensibleMoves();
-    	 
-   	int         Move                 = 0;
-   	//________________________________________________________________________________________________________________
-   	
-                                    
+    
+	    if (Dist_Salat  <  Dist &&  Gegner_Position != Nächter_Salat &&  Nächter_Markt > Nächter_Salat ){
+			 
+	    	// Hier wird der Nächste Salat angesteuert und berechnet wie viele Felder zwischen dem Salat und dem Player nicht begebar sind 
+	    	
+	    	int Nicht_begebare_Felder = 0;
+	      	
+	        Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position);
+			Nächter_Hase = gameState.getBoard().getNextField(Field.HARE, Eigne_Position);
+			
+			
+	    while (Nächter_Igel < Nächter_Salat || Nächter_Hase < Nächter_Salat && Karten_ings == 0  ) {
+	    		
+	    	if (Nächter_Igel < Nächter_Salat ) {
+	    		
+	    		Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
+	    		
+	    		Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Nächter_Igel);    		
+	    	     }
+	    	
+	        if (Nächter_Hase < Nächter_Salat && Karten_ings == 0   ) {
+	    		
+	        		  Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
+	        	 
+	    		
+	    		Nächter_Hase = gameState.getBoard().getNextField(Field.HARE, Nächter_Hase );			
+	    	     }  
+	         }
+	    	
+	   if (Gegner_Position < Nächter_Salat && Eigne_Position < Gegner_Position &&  Gegner_FeldTyp != Field.HEDGEHOG && Gegner_FeldTyp != Field.HARE  ) {
+	    	
+	    	Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
+	   }	
+	    	
+	   		Move = Dist_Salat - Nicht_begebare_Felder - 1;
+	   		
+	   		
+	   		 
+	    }
+	   
+	    
+	    
+	    if (Eigne_FeldTyp == Field.SALAD) {
+	    	 
+	    	// Für den Fall das wir auf einem Salatfeld sind muss immer "Move = 0" gesetzt werde da es sonst zu einem Fehler kommt 
+	    	
+		     Move = 0;	
+	    }
+	    
+	    
+   			
+       Move move = Mögliche_Züge.get(Move);   // hier wird für die berechnung des Zuges "Move" eingesetzt und dann aus der Liste an möglichen Zügen ausgweählt 
    	
    
-    
-   if (Dist_Markt  <  Dist   &&  Gegner_Position != Nächter_Markt ){
-		 
-    	int Nicht_begebare_Felder = 0;
-    	
-        Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position);
-		Nächter_Hase = gameState.getBoard().getNextField(Field.HARE, Eigne_Position);
-		
-		
-    while (Nächter_Igel < Nächter_Markt || Nächter_Hase < Nächter_Markt ) {
     		
-    	if (Nächter_Igel < Nächter_Markt ) {
     		
-    		Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
-    		
-    		Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Nächter_Igel);    		
-    	     }
-    	
-        if (Nächter_Hase < Nächter_Markt) {
-    		
-    		Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
-    		
-    		Nächter_Hase = gameState.getBoard().getNextField(Field.HARE, Nächter_Hase );			
-    	     }  
-         }
-    	
-   if (Gegner_Position < Nächter_Markt &&  Gegner_FeldTyp != Field.HEDGEHOG && Gegner_FeldTyp != Field.HARE ) {
-    	
-    	Nicht_begebare_Felder = Nicht_begebare_Felder + 1;
-   }	
-    	
-   		Move = Dist_Markt - Nicht_begebare_Felder;
-   		
-   		System.out.println(Move);	
-  }  
-
-
- if (Eigne_FeldTyp == Field.SALAD) {
-    	 
-	     Move = 0;	
-  }
-    
-    			
-   Move move = Mögliche_Züge.get(Move);
-   	
+   	// Der folgende Abschnnit dient dazu um in der Konsole zu sehen was durchgeführt wird:
    
-
-    log.info("Sende {} nach {}ms.", move, System.currentTimeMillis() - startTime);                       // Zum messen der Zeit                                    
+    /*--------------------------------------------------------------------------------------------------------*/
+   
+   
+    log.info("Sende {} nach {}ms.", move, System.currentTimeMillis() - startTime);
      
     System.out.println("Zug: " + gameState.getTurn());
     System.out.println(move);
@@ -95,7 +228,13 @@ long startTime = System.currentTimeMillis();                                    
     System.out.println(Eigne_FeldTyp);
     System.out.println(" ");
     System.out.println(Dist_Markt + "/" + GameRuleLogic.INSTANCE.calculateMoveableFields(Menge_an_Karrotten));
+    System.out.println(" ");
+    System.out.println(Karten_ings);  System.out.println(Move);  
     System.out.println("________________________________________________________________________");
+    System.out.println(" ");
     
-
+    
+    /*---------------------------------------------------------------------------------------------------------*/	
+    
+    
     return move;
