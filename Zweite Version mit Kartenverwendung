@@ -10,7 +10,7 @@
 	     	
 	     	/*-----------------------------------------------------------------------------------------------------------------------------*/
 	     	
-	     	
+     	
 	     	int         Eigne_Karrotten      = gameState.getCurrentPlayer().getCarrots();
 	     	
 	     	int         Eigne_Position       = gameState.getCurrentPlayer().getPosition();
