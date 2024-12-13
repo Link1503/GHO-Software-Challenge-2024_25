@@ -1,0 +1,18 @@
+
+1. Berechnung der nicht begehbaren Felder als Methode:
+
+private int berechneNichtBegehbareFelder(int zielPosition, int startPosition) {
+    int nichtBegehbareFelder = 0;
+    int position = startPosition;
+
+    while (position < zielPosition) {
+        Field fieldType = gameState.getBoard().getField(position);
+        if (fieldType == Field.HEDGEHOG || fieldType == Field.HARE) {
+            nichtBegehbareFelder++;
+        }
+        position = gameState.getBoard().getNextField(fieldType, position);
+        if (position == -1) break; // Falls kein nächstes Feld vorhanden ist
+    }
+
+    return nichtBegehbareFelder;
+}
