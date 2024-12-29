@@ -67,69 +67,15 @@ public class Logic implements IGameHandler {
 	     	int         Eigne_Position       = gameState.getCurrentPlayer().getPosition();
 	     	
 	     	int         Gegner_Position      = gameState.getOtherPlayer().getPosition();
-	     	
-            int Nächter_Markt = 0;
             
-	     	if ( gameState.getBoard().getNextField(Field.MARKET, Eigne_Position) != null ) {	
-	     	    Nächter_Markt = gameState.getBoard().getNextField(Field.MARKET, Eigne_Position); 
-	     	    }
-	     	if ( gameState.getBoard().getNextField(Field.MARKET, Eigne_Position) == null ) {	
-		        Nächter_Markt = 0; 
-		     	}
+            int Nächter_Markt = gameState.getBoard().getNextField(Field.MARKET, Eigne_Position) != null ? gameState.getBoard().getNextField(Field.MARKET, Eigne_Position) : 0;
+            int Nächter_Salat = gameState.getBoard().getNextField(Field.SALAD, Eigne_Position) != null ? gameState.getBoard().getNextField(Field.SALAD, Eigne_Position) : 0;
+            int Nächter_Hase = gameState.getBoard().getNextField(Field.HARE, Eigne_Position) != null ? gameState.getBoard().getNextField(Field.HARE, Eigne_Position) : 0;
+            int Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position) != null ? gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position) : 0;
+            int Nächstes_zwei_Feld = gameState.getBoard().getNextField(Field.POSITION_2, Eigne_Position) != null ? gameState.getBoard().getNextField(Field.POSITION_2, Eigne_Position) : 0;
+            int Nächstes_eins_Feld = gameState.getBoard().getNextField(Field.POSITION_1, Eigne_Position) != null ? gameState.getBoard().getNextField(Field.POSITION_1, Eigne_Position) : 0;
+            int Nächste_Karrote = gameState.getBoard().getNextField(Field.CARROTS, Eigne_Position) != null ? gameState.getBoard().getNextField(Field.CARROTS, Eigne_Position) : 0;
 	     	
-	     	int Nächter_Salat = 0;
-	     	
-	     	if ( gameState.getBoard().getNextField(Field.SALAD, Eigne_Position) != null ) {	
-		     	Nächter_Salat = gameState.getBoard().getNextField(Field.SALAD, Eigne_Position); 
-		     	}
-	     	if ( gameState.getBoard().getNextField(Field.SALAD, Eigne_Position) == null ) {	
-		        Nächter_Salat = 0; 
-	     	    }
-	     	
-	     	int Nächter_Hase = 0;    
-	     	
-	     	if ( gameState.getBoard().getNextField(Field.HARE, Eigne_Position) != null ) {	
-	     		Nächter_Hase = gameState.getBoard().getNextField(Field.HARE, Eigne_Position); 
-		     	}
-	     	if ( gameState.getBoard().getNextField(Field.HARE, Eigne_Position) == null ) {	
-	     		Nächter_Hase = 0; 
-	     	    }
-	     	
-	     	int Nächter_Igel = 0;
-	     	
-	     	if ( gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position) != null ) {	
-	     	    Nächter_Igel = gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position); 
-		     	}
-	     	if ( gameState.getBoard().getNextField(Field.HEDGEHOG, Eigne_Position) == null ) {	
-	     		Nächter_Igel = 0; 
-	     	    }
-	     	
-	     	int Nächstes_zwei_Feld = 0;
-	     	
-	     	if ( gameState.getBoard().getNextField(Field.POSITION_2, Eigne_Position) != null ) {	
-	     		Nächstes_zwei_Feld = gameState.getBoard().getNextField(Field.POSITION_2, Eigne_Position); 
-		     	}
-	     	if ( gameState.getBoard().getNextField(Field.POSITION_2, Eigne_Position) == null ) {	
-	     		Nächstes_zwei_Feld = 0; 
-	     	    }
-	     	
-	     	int Nächstes_eins_Feld = 0;
-	     	
-	     	if ( gameState.getBoard().getNextField(Field.POSITION_1, Eigne_Position) != null ) {	
-	     		Nächstes_eins_Feld = gameState.getBoard().getNextField(Field.POSITION_1, Eigne_Position); 
-		     	}
-	     	if ( gameState.getBoard().getNextField(Field.POSITION_1, Eigne_Position) == null ) {	
-	     		Nächstes_eins_Feld = 0; 
-	     	    }
-	     	
-            int Nächste_Karrote = 0;
-	     	
-	     	if ( gameState.getBoard().getNextField(Field.CARROTS, Eigne_Position) != null ) {	
-	     		Nächste_Karrote = gameState.getBoard().getNextField(Field.CARROTS, Eigne_Position); 
-		     	}
-	     	if ( gameState.getBoard().getNextField(Field.CARROTS, Eigne_Position) == null ) {	
-	     		Nächste_Karrote = 0; 
-	     	    }
 	     	
 	     	int         Dist_eins_Feld       = Nächstes_eins_Feld - Eigne_Position;
 	     	
@@ -521,11 +467,3 @@ public class Logic implements IGameHandler {
   
   
 }
-
-
-
-
-
-
-
-
