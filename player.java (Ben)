@@ -145,23 +145,26 @@ public class Logic implements IGameHandler {
     int Move = 0;
     int Anzahl_Mögliche_Züge = Mögliche_Züge.size();   
     
-    boolean[] Condition = new boolean[9];
+    boolean[] Condition = new boolean[11];
     
-    Condition[0] = Dist_Ziel <= Eigene_Dist && Gegner_Position != 64 && (Eigne_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Ziel)) <= 10 && Eigne_Salate == 0;
-    Condition[1] = Dist_vor_Ziel <= Eigene_Dist && Gegner_Position != 63 && (Eigne_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_vor_Ziel)) > 10 && Eigne_Salate == 0;
-    Condition[2] = Dist_Salat < Eigene_Dist && Gegner_Position != Nächter_Salat && Eigne_Salate != 0 && Nächter_Salat > 0;
-    Condition[3] = Dist_Markt < Eigene_Dist && Gegner_Position != Nächter_Markt && Nächter_Markt < Nächter_Salat && Nächter_Markt > 0;
-    Condition[4] = Dist_Hase < Eigene_Dist && Gegner_Position != Nächter_Hase  && Nächter_Hase > 0 &&
+    Condition[0] = gameState.mustEatSalad(gameState.getCurrentPlayer());
+    Condition[1] = Dist_Ziel <= Eigene_Dist && Gegner_Position != 64 && (Eigne_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Ziel)) <= 10 && Eigne_Salate == 0;
+    Condition[2] = Eigne_Position == 63 && Eigne_Salate == 0 && (Eigne_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Ziel)) > 10;
+    Condition[3] = Dist_vor_Ziel <= Eigene_Dist && Gegner_Position != 63 && (Eigne_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_vor_Ziel)) > 10 && Eigne_Salate == 0;
+    Condition[4] = Dist_Salat < Eigene_Dist && Gegner_Position != Nächter_Salat && Eigne_Salate != 0 && Nächter_Salat > 0;
+    Condition[5] = Dist_Markt < Eigene_Dist && Gegner_Position != Nächter_Markt && Nächter_Markt < Nächter_Salat && Nächter_Markt > 0;
+    Condition[6] = Dist_Hase < Eigene_Dist && Gegner_Position != Nächter_Hase  && Nächter_Hase > 0 &&
     		       ((Gegner_Karten_Typ[1] != Karten_Typ[1] && Karten_Typ[1] != 0 && Gegner_Position > 55 && Gengner_Karroten + 100  > Eigne_Karrotten) || (Eigne_Salate != 0 && Karten_Typ[0] != 0));
-    Condition[5] = Dist_eins_Feld < Eigene_Dist && Gegner_Position != Nächstes_eins_Feld && Eigne_Position > Gegner_Position &&
+    Condition[7] = Dist_eins_Feld < Eigene_Dist && Gegner_Position != Nächstes_eins_Feld && Eigne_Position > Gegner_Position &&
     			   Nächstes_eins_Feld > Gegner_Position && Nächstes_eins_Feld > 0 && Nächstes_eins_Feld < Nächter_Salat;
-    Condition[6] = Dist_zwei_Feld < Eigene_Dist && Gegner_Position != Nächstes_zwei_Feld && Eigne_Position < Gegner_Position && Nächstes_zwei_Feld < Gegner_Position && Nächstes_zwei_Feld > 0;
-    Condition[7] = Dist_Karrote <= Eigene_Dist &&  Gegner_Position != Nächste_Karrote && Eigne_Position != 63;
-    Condition[8] = Eigne_Salate != 0 && Eigne_Position < 57 && Eigne_Karrotten <= 20 && gameState.getBoard().getPreviousField(Field.HEDGEHOG, Eigne_Position) != null ;
+    Condition[8] = Dist_zwei_Feld < Eigene_Dist && Gegner_Position != Nächstes_zwei_Feld && Eigne_Position < Gegner_Position && Nächstes_zwei_Feld < Gegner_Position && Nächstes_zwei_Feld > 0;
+    Condition[9] = Dist_Karrote <= Eigene_Dist &&  Gegner_Position != Nächste_Karrote && Eigne_Position != 63;
+    Condition[10] = Eigne_Salate != 0 && Eigne_Position < 57 && Eigne_Karrotten <= 20 && gameState.getBoard().getPreviousField(Field.HEDGEHOG, Eigne_Position) != null ;
     
-    int[] Feld = {64, 63, Nächter_Salat, Nächter_Markt, Nächter_Hase, Nächstes_eins_Feld, Nächstes_zwei_Feld, Nächste_Karrote , 0};
-    int[] Dist = {Dist_Ziel, Dist_vor_Ziel, Dist_Salat, Dist_Markt, Dist_Hase, Dist_eins_Feld, Dist_zwei_Feld, Dist_Karrote, 0} ;
-    String[] Schleife = {"Ziel Funktion", "Vor Ziel Funktion", "Salat Funktion", "Markt Funktion", "Hasen Funktion", "Erste Position Funktion", "Zweite Position Funktion", "Karrotten Funktion", "Igel Funktion"};
+    int[] Feld = {0, 64, 0, 63, Nächter_Salat, Nächter_Markt, Nächter_Hase, Nächstes_eins_Feld, Nächstes_zwei_Feld, Nächste_Karrote , 0};
+    int[] Dist = {0, Dist_Ziel, 0 , Dist_vor_Ziel, Dist_Salat, Dist_Markt, Dist_Hase, Dist_eins_Feld, Dist_zwei_Feld, Dist_Karrote, 0} ;
+    String[] Schleife = {"Salatfressen Funktion ", "Ziel Funktion", "Karrotten abgeben Funktion", "Vor Ziel Funktion", "Salat Funktion", "Markt Funktion", "Hasen Funktion", 
+    		             "Erste Position Funktion", "Zweite Position Funktion", "Karrotten Funktion", "Igel Funktion"};
     
     int Nächstes_Feld = 0;
     
@@ -181,22 +184,9 @@ public class Logic implements IGameHandler {
 	    }	
       }
     
-   if ( Gespielte_Schleife == "Igel Funktion") {
-        
-      if (Eigne_FeldTyp != Field.CARROTS) {
-        Move = Anzahl_Mögliche_Züge - 1;
-        }
-      if (Eigne_FeldTyp == Field.CARROTS) {
-        Move = Anzahl_Mögliche_Züge - 2;
-        }
-       }
-    
-    if (Eigne_Position == 63 && Gespielte_Schleife != "Ziel Funktion" && Eigne_Salate == 0) {
-      Move = 2;
-      Gespielte_Schleife = "Karrotten abgeben Funktion";
-    }
+    switch (Gespielte_Schleife) {
      
-    if (Gespielte_Schleife != "nichts" && Gespielte_Schleife != "Igel Funktion" && Gespielte_Schleife != "Karrotten abgeben Funktion") {
+    case "Ziel Funktion","Vor Ziel Funktion", "Salat Funktion", "Markt Funktion", "Hasen Funktion", "Erste Position Funktion", "Zweite Position Funktion", "Karrotten Funktion" : {
       int Nicht_begebare_Felder = 0;
       Move = 0;
 
@@ -255,22 +245,34 @@ public class Logic implements IGameHandler {
       }
 
       Move = Feld_Dist - Nicht_begebare_Felder + Karte - 1;
+      
+    break;
+    }
+    
+    case  "Igel Funktion" : {
+        if (Eigne_FeldTyp != Field.CARROTS) {
+          Move = Anzahl_Mögliche_Züge - 1;
+          }
+        if (Eigne_FeldTyp == Field.CARROTS) {
+          Move = Anzahl_Mögliche_Züge - 2;
+          }
+    break;
+     }
+      
+    case "Karrotten abgeben Funktion" : Move = 2;
+    break;
+
+    case "Salatfressen Funktion ": Move = 0;
+    break;
+
     }
     
     while (Anzahl_Mögliche_Züge < Move) {
 
-      Move = Anzahl_Mögliche_Züge - 1;
-      Gespielte_Schleife = "Notfall Funktion";
-    }
-    if (gameState.mustEatSalad(gameState.getCurrentPlayer()) == true) {
-
-      // Für den Fall das wir auf einem Salatfeld sind muss immer "Move = 0" gesetzt werde da es sonst zu einem Fehler kommt 
-
-      Gespielte_Schleife = "Salatfressen Funktion ";
-
-      Move = 0;
-
-    }
+        Move = Anzahl_Mögliche_Züge - 1;
+        Gespielte_Schleife = "Notfall Funktion";
+      }
+    
 
    
     
