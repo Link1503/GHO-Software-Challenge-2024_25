@@ -124,19 +124,19 @@ public class Logic implements IGameHandler {
 
       if (Karten_Typ[0] != 0 && Eigne_Salate != 0) {
         Kartenspielbarkeit = true;
-        KartenZahl = KartenZahl + 1;
+        KartenZahl++;
       }
       if (Karten_Typ[1] != 0 && Gegner_Position < Letzter_Salat && Eigne_Position < Letzter_Salat && Nächter_Hase < Letzter_Salat) {
         Kartenspielbarkeit = true;
-        KartenZahl = KartenZahl + 1;
+        KartenZahl++;
       }
       if (Karten_Typ[2] != 0 && Eigne_Position < Gegner_Position) {
         Kartenspielbarkeit = true;
-        KartenZahl = KartenZahl + 1;
+        KartenZahl++;
       }
       if (Karten_Typ[3] != 0 && Eigne_Position > Gegner_Position) {
         Kartenspielbarkeit = true;
-        KartenZahl = KartenZahl + 1;
+        KartenZahl++;
       }
     }
 
@@ -174,10 +174,10 @@ public class Logic implements IGameHandler {
     
     	if (Condition[i] == true ) {
     		
-    		Nächstes_Feld = Feld[i];
-    		Feld_Dist = Dist[i];
-    		Gespielte_Schleife = Schleife[i];
-    		break;
+		Nächstes_Feld = Feld[i];
+		Feld_Dist = Dist[i];
+		Gespielte_Schleife = Schleife[i];
+		break;
     	}
     	else {
     	continue;
@@ -227,8 +227,8 @@ public class Logic implements IGameHandler {
   	
   	      else {
   	      continue;
-  	        }
   	      }
+  	    }
       int Karte = 0;
 
         if (Nächstes_Feld == Nächter_Hase && Gegner_Karten_Typ[1] != Karten_Typ[1] && Karten_Typ[1] != 0 && Gegner_Position > 57 && Gengner_Karroten + 100  > Eigne_Karrotten
@@ -267,11 +267,10 @@ public class Logic implements IGameHandler {
 
     }
     
-    while (Anzahl_Mögliche_Züge < Move) {
-
+    if  (Anzahl_Mögliche_Züge < Move ||  Move < 0) {
         Move = Anzahl_Mögliche_Züge - 1;
         Gespielte_Schleife = "Notfall Funktion";
-      }
+    }
     
 
    
@@ -295,6 +294,7 @@ public class Logic implements IGameHandler {
     System.out.println("Kartenspielbarkeit: " + Kartenspielbarkeit + "\n");
     System.out.println("Karten =  " + "Saladfressen: " + Karten_Typ[0] + " | " + "Karotten tauschen: " + Karten_Typ[1] + " | " + "Zurückfallen: " + Karten_Typ[2] + " | " + "Vorrücken: " + Karten_Typ[3] + "\n");
     System.out.println("Karten-Gegner =  " + "Saladfressen: " + Gegner_Karten_Typ[0] + " | " + "Karotten tauschen: " + Gegner_Karten_Typ[1] + " | " + "Zurückfallen: " + Gegner_Karten_Typ[2] + " | " + "Vorrücken: " + Gegner_Karten_Typ[3] + "\n");
+    System.out.println("\n");
     System.out.println("________________________________________________________________________");
 
     /*---------------------------------------------------------------------------------------------------------*/
