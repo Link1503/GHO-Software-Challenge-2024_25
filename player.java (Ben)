@@ -152,14 +152,14 @@ public class Logic implements IGameHandler {
     Condition[2] = Eigne_Position == 63 && Eigne_Salate == 0 && (Eigne_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Ziel)) > 10;
     Condition[3] = Dist_vor_Ziel <= Eigene_Dist && Gegner_Position != 63 && (Eigne_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_vor_Ziel)) > 10 && Eigne_Salate == 0;
     Condition[4] = Dist_Salat < Eigene_Dist && Gegner_Position != Nächter_Salat && Eigne_Salate != 0 && Nächter_Salat > 0;
-    Condition[5] = Dist_Markt < Eigene_Dist && Gegner_Position != Nächter_Markt && Nächter_Markt < Nächter_Salat && Nächter_Markt > 0;
+    Condition[5] = Dist_Markt < Eigene_Dist && Gegner_Position != Nächter_Markt && Nächter_Markt < Nächter_Salat && Nächter_Markt > 0 && (Eigne_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Markt)) >= 10;
     Condition[6] = Dist_Hase < Eigene_Dist && Gegner_Position != Nächter_Hase  && Nächter_Hase > 0 &&
     		       ((Gegner_Karten_Typ[1] != Karten_Typ[1] && Karten_Typ[1] != 0 && Gegner_Position > 55 && Gengner_Karroten + 100  > Eigne_Karrotten) || (Eigne_Salate != 0 && Karten_Typ[0] != 0));
     Condition[7] = Dist_eins_Feld < Eigene_Dist && Gegner_Position != Nächstes_eins_Feld && Eigne_Position > Gegner_Position &&
     			   Nächstes_eins_Feld > Gegner_Position && Nächstes_eins_Feld > 0 && Nächstes_eins_Feld < Nächter_Salat;
     Condition[8] = Dist_zwei_Feld < Eigene_Dist && Gegner_Position != Nächstes_zwei_Feld && Eigne_Position < Gegner_Position && Nächstes_zwei_Feld < Gegner_Position && Nächstes_zwei_Feld > 0;
     Condition[9] = Dist_Karrote <= Eigene_Dist &&  Gegner_Position != Nächste_Karrote && Eigne_Position != 63;
-    Condition[10] = Eigne_Salate != 0 && Eigne_Position < 57 && Eigne_Karrotten <= 20 && gameState.getBoard().getPreviousField(Field.HEDGEHOG, Eigne_Position) != null ;
+    Condition[10] = Eigne_Salate != 0 && Eigne_Position < 57 && Eigne_Karrotten <= 20 && gameState.getBoard().getPreviousField(Field.HEDGEHOG, Eigne_Position) != null;
     
     int[] Feld = {0, 64, 0, 63, Nächter_Salat, Nächter_Markt, Nächter_Hase, Nächstes_eins_Feld, Nächstes_zwei_Feld, Nächste_Karrote , 0};
     int[] Dist = {0, Dist_Ziel, 0 , Dist_vor_Ziel, Dist_Salat, Dist_Markt, Dist_Hase, Dist_eins_Feld, Dist_zwei_Feld, Dist_Karrote, 0} ;
@@ -230,13 +230,14 @@ public class Logic implements IGameHandler {
   	      }
   	    }
       int Karte = 0;
-
-        if (Nächstes_Feld == Nächter_Hase && Gegner_Karten_Typ[1] != Karten_Typ[1] && Karten_Typ[1] != 0 && Gegner_Position > 57 && Gengner_Karroten + 100  > Eigne_Karrotten
-          ||Nächstes_Feld == Nächter_Markt && (Gegner_Karten_Typ[1] >= Karten_Typ[1] || Karten_Typ[1] == 0 )) {
+      
+        if (Gespielte_Schleife == "Hasen Funktion" && Gegner_Karten_Typ[1] != Karten_Typ[1] && Karten_Typ[1] != 0 && Gegner_Position > 57 && Gengner_Karroten + 100  > Eigne_Karrotten
+          ||Gespielte_Schleife ==  "Markt Funktion" && (Gegner_Karten_Typ[1] >= Karten_Typ[1] || Karten_Typ[1] == 0 )) {
           Karte = 1; // Karroten tauschen
         }
 
-        if (Nächstes_Feld == Nächter_Hase && Eigne_Salate != 0 && Karten_Typ[0] != 0 || Nächstes_Feld == Nächter_Markt &&  Gegner_Karten_Typ[1] < Karten_Typ[1] && Karten_Typ[1] != 0 && Eigne_Salate != 0) {
+        if (Gespielte_Schleife == "Hasen Funktion" && Eigne_Salate != 0 && Karten_Typ[0] != 0 
+          ||Gespielte_Schleife ==  "Markt Funktion" &&  Gegner_Karten_Typ[1] < Karten_Typ[1] && Karten_Typ[1] != 0 && Eigne_Salate != 0) {
           Karte = 0; //Saladfress 	 
         }
         
@@ -265,9 +266,11 @@ public class Logic implements IGameHandler {
     case "Salatfressen Funktion ": Move = 0;
     break;
 
+    case "nichts": Move = 0;
+    break;
     }
     
-    if  (Anzahl_Mögliche_Züge < Move ||  Move < 0) {
+    if  (Anzahl_Mögliche_Züge <= Move ||  Move < 0) {
         Move = Anzahl_Mögliche_Züge - 1;
         Gespielte_Schleife = "Notfall Funktion";
     }
