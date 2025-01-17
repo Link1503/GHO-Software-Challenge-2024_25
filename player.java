@@ -1,4 +1,3 @@
-// made by me
 package sc.player;
 
 import org.slf4j.Logger;
@@ -40,16 +39,14 @@ public class Logic implements IGameHandler {
     }
     return arr1;
   }
-
-  public Move calculateMove() {  
+  
+  
+    public Move calculateMove() {  
 
     long startTime = System.currentTimeMillis(); // zum messen der Zeit 
 
     log.info("Es wurde ein Zug von {} angefordert.", gameState.getCurrentTeam());
 
-    //  Dieser Abschnit ist nur für die bennenung und berechnung von einigen Werten, damit es übersichtlicher wird
-
-    /*-----------------------------------------------------------------------------------------------------------------------------*/
     
     int[] Alle_Hasen = IndexArrFürFeldtyp(gameState.getBoard(), Field.HARE);
     int[] Alle_Igel = IndexArrFürFeldtyp(gameState.getBoard(), Field.HEDGEHOG);
@@ -173,13 +170,13 @@ public class Logic implements IGameHandler {
     int Nächstes_Feld = 0;
 
     int Feld_Dist = 0;
-
-    int y = 0;
-    int z = 0;
     
+    String Zug1 = "nichts";
+    String Zug2 = "nichts";
+    String Zug3 = "nichts";
     
-   
-   
+    String[][] Platzhalter2 = new String[90][3];
+    
     String[] Platzhalter = new  String[Condition.length];
     int Mögliche_Züge_int = 0;
     for (int i = 0; i < Condition.length; i++) {
@@ -196,6 +193,37 @@ public class Logic implements IGameHandler {
     	 Mögliche_Züge[i] = Platzhalter[i];
      }
     
+    int e = 0;
+    
+    String[] Mögliche_Züge1 = new  String[Mögliche_Züge_int];
+    String[] Mögliche_Züge2 = new  String[Mögliche_Züge_int];
+    
+    for (int i = 0; i < Mögliche_Züge_int; i++) {	
+        
+    	Mögliche_Züge1 = Mögliche_Züge;    
+    	
+	    for (int k = 0; k < Mögliche_Züge_int; k++) {
+	    	
+	    	Mögliche_Züge2 = Mögliche_Züge1;
+	    	
+		    for (int b = 0; b < Mögliche_Züge_int; b ++ ,e++) {
+		    	 Platzhalter2 [e][0] = Mögliche_Züge[i];
+		    	 Platzhalter2 [e][1] = Mögliche_Züge1[k] ;
+		    	 Platzhalter2 [e][2] = Mögliche_Züge2[b];
+		  } 	    
+	     } 	    
+        }
+   
+    String[][] Alle_Möglichkeiten = new String [e][3];
+    for (int i = 0; i < e; i++){
+       for (int j = 0; j < 3; j++){
+       Alle_Möglichkeiten [i][j] = Platzhalter2 [i][j];
+   }
+  }
+  
+   
+  
+
     for (int i = 0; i < Condition.length; i++) {
     
     	if (Condition[i] == true ) {
@@ -301,8 +329,8 @@ public class Logic implements IGameHandler {
         Gespielte_Schleife = "Notfall Funktion";
     }
     
-
-   
+    
+   // String [][] Platz = Alle();
     
     Move move = Alle_Züge.get(Move); // hier wird für die berechnung des Zuges "Move" eingesetzt und dann aus der Liste an möglichen Zügen ausgweählt 
 
@@ -323,7 +351,11 @@ public class Logic implements IGameHandler {
     System.out.println("Kartenspielbarkeit: " + Kartenspielbarkeit + "\n");
     System.out.println("Karten =  " + "Saladfressen: " + Karten_Typ[0] + " | " + "Karotten tauschen: " + Karten_Typ[1] + " | " + "Zurückfallen: " + Karten_Typ[2] + " | " + "Vorrücken: " + Karten_Typ[3] + "\n");
     System.out.println("Karten-Gegner =  " + "Saladfressen: " + Gegner_Karten_Typ[0] + " | " + "Karotten tauschen: " + Gegner_Karten_Typ[1] + " | " + "Zurückfallen: " + Gegner_Karten_Typ[2] + " | " + "Vorrücken: " + Gegner_Karten_Typ[3] + "\n");
-    System.out.println(Arrays.asList(Mögliche_Züge) + "\n");
+    for (int i = 0; i <  Alle_Möglichkeiten.length; i++){
+        for (int j = 0; j < Alle_Möglichkeiten[i].length; j++)
+            System.out.print(  Alle_Möglichkeiten[i][j] + ", " );
+        System.out.println();
+    }
     System.out.println("________________________________________________________________________");
 
     /*---------------------------------------------------------------------------------------------------------*/
