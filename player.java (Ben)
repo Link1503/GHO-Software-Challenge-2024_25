@@ -66,8 +66,17 @@ public class Logic implements IGameHandler {
 		}
 		return Karten_Typ;
 	}
+	
+	public String[] VorherigeZüge(String[] Züge) {
+		
+		String[] VorherigeZüge = new String[Züge.length];
+		 for (int i = 0; i < VorherigeZüge.length; i++) {	 
+			 Züge[i] = VorherigeZüge[i];
+		 }
+		return VorherigeZüge;
+	}
 
-	public boolean[] Condition(int Eigene_Position, int Eigene_Salate, int Eigene_Karrotten, int SWAP_CARROTS, int EAT_SALAD ,int[] GegnerKarten) {
+	public boolean[] Condition(int Eigene_Position, int Eigene_Salate, int Eigene_Karrotten, int SWAP_CARROTS, int EAT_SALAD ,int[] GegnerKarten, String VorherigerZug) {
 
 		int Gegner_Position = gameState.getOtherPlayer().getPosition();
 		int Gengner_Karroten = gameState.getOtherPlayer().getCarrots();
@@ -90,10 +99,16 @@ public class Logic implements IGameHandler {
 	    int Dist_vor_Ziel = 63 - Eigene_Position;
 	    int Dist_Karrote = Nächste_Karrote - Eigene_Position;
 	    int Dist_Igel = Vorheriger_Igel - Eigene_Position ;
-	    int Eigene_Dist = GameRuleLogic.INSTANCE.calculateMoveableFields(Eigene_Karrotten);   
+	    int Eigene_Dist = GameRuleLogic.INSTANCE.calculateMoveableFields(Eigene_Karrotten); 
+	    
+	    Field FeldTyp = gameState.getBoard().getField(Eigene_Position);
 	   
 		boolean[] Condition = new boolean[11];
-	    Condition[0] = gameState.mustEatSalad(gameState.getCurrentPlayer());
+	    Condition[0] = FeldTyp == Field.SALAD && VorherigerZug != "Salatfressen Funktion " ;
+	    if ( VorherigerZug == "nichts") {
+	    	Condition[0]= gameState.mustEatSalad(gameState.getCurrentPlayer());
+	    }
+	    if (Condition[0] == false) {
 	    Condition[1] = Dist_Ziel <= Eigene_Dist && Gegner_Position != 64 && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Ziel)) <= 10 && Eigene_Salate == 0;
 	    Condition[2] = Eigene_Position == 63 && Eigene_Salate == 0 && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Ziel)) > 10;
 	    Condition[3] = Eigene_Position != 63 && Dist_vor_Ziel <= Eigene_Dist && Gegner_Position != 63 && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_vor_Ziel)) > 10 && Eigene_Salate == 0;
@@ -107,8 +122,7 @@ public class Logic implements IGameHandler {
 	    Condition[8] = Dist_zwei_Feld < Eigene_Dist && Gegner_Position != Nächstes_zwei_Feld && Eigene_Position < Gegner_Position && Nächstes_zwei_Feld < Gegner_Position && Nächstes_zwei_Feld > 0;
 	    Condition[9] = Eigene_Salate != 0 && Eigene_Position < 57 && Eigene_Karrotten <= 20 && gameState.getBoard().getPreviousField(Field.HEDGEHOG, Eigene_Position) != null;
 	    Condition[10] = Dist_Karrote <= Eigene_Dist &&  Gegner_Position != Nächste_Karrote && Eigene_Position != 63;
-	    
-		
+	    }
 	    return Condition;
 	   }
 	
@@ -187,14 +201,25 @@ public class Logic implements IGameHandler {
 	          if (Eigene_Salate != 0 && EAT_SALAD != 0) {
 	        	  EAT_SALAD--; 
 	              Eigene_Salate--;
+	              Eigene_Salate--;
+		          if(Eigene_Position > Gegner_Position ) {
 	              Eigene_Karrotten = Eigene_Karrotten + 10;
+		          }
+		          if(Eigene_Position > Gegner_Position ) {
+	              Eigene_Karrotten = Eigene_Karrotten + 30;
+		          }
 	          }
 	          break;
 	      }
 
 	      case "Salatfressen Funktion " :{
 	          Eigene_Salate--;
-	          Eigene_Karrotten = Eigene_Karrotten + 10;
+	          if(Eigene_Position > Gegner_Position ) {
+              Eigene_Karrotten = Eigene_Karrotten + 10;
+	          }
+	          if(Eigene_Position > Gegner_Position ) {
+              Eigene_Karrotten = Eigene_Karrotten + 30;
+	          }
 	          break;
 	      }
 	      case "Igel Funktion" :{
@@ -251,35 +276,56 @@ public class Logic implements IGameHandler {
 	    int Dist_Feld = 0;
 	    int[] Karten  = Karten(gameState.getCurrentPlayer().getCards());
 	    int[] GegnerKarten  = Karten(gameState.getOtherPlayer().getCards());
-	    boolean[]Condition = Condition(Eigene_Position, Eigene_Salate, Eigene_Karrotten, Karten[1], Karten[0] , GegnerKarten);
-	    String[][] Platzhalter2 = new String[90][MengeAnWiederholungen];
+	    boolean[]Condition = Condition(Eigene_Position, Eigene_Salate, Eigene_Karrotten, Karten[1], Karten[0] , GegnerKarten, "nichts");
+	    String[][] Platzhalter2 = new String[1000][MengeAnWiederholungen];
 	    String[] Mögliche_Züge2 = null;
 	    int Mögliche_Züge_int1 = 0;
 	    String[] Mögliche_Züge1 = null;
 	    int Mögliche_Züge_int2 = 0;
+	    String[] Mögliche_Züge3 = null;
+	    String[] Mögliche_Züge4 = null;
 	    String[]  Mögliche_Züge = ZugZuortnung(Condition);
 	    int e = 0;
 	    
 	    for(int i = 0 ; i < Mögliche_Züge.length ; i++){  
+	    	
         int[] Werte = Werteveränderung(Eigene_Position,  Eigene_Salate,  Eigene_Karrotten, Karten[1], Karten[2], Mögliche_Züge[i] );
-	    boolean[]Condition1 = Condition(Werte[0], Werte[1], Werte[2], Werte[3], Werte[4], GegnerKarten);
+	    boolean[]Condition1 = Condition(Werte[0], Werte[1], Werte[2], Werte[3], Werte[4], GegnerKarten, Mögliche_Züge[i]);
 	    Mögliche_Züge1 = ZugZuortnung(Condition1);
 
 		    for (int f = 0; f <  Mögliche_Züge1.length; f++) {
+		    	
 		    int[] Werte1 = Werteveränderung(Werte[0],  Werte[1],  Werte[2], Werte[3], Werte[4], Mögliche_Züge1[f]);
-			boolean[]Condition2 = Condition(Werte1[0], Werte1[1], Werte1[2], Werte1[3], Werte1[4], GegnerKarten);
+			boolean[]Condition2 = Condition(Werte1[0], Werte1[1], Werte1[2], Werte1[3], Werte1[4], GegnerKarten, Mögliche_Züge1[f] );
 			Mögliche_Züge2 = ZugZuortnung(Condition2);
-			for (int b = 0; b < Mögliche_Züge2.length; b ++ ,e++) {
-                Platzhalter2 [e][0] = Mögliche_Züge[i];
-                Platzhalter2 [e][1] = Mögliche_Züge1[f] ;
-                Platzhalter2 [e][2] = Mögliche_Züge2[b];
-              }	
+			
+			for (int b = 0; b < Mögliche_Züge2.length; b ++) {
+				
+			    int[] Werte2 = Werteveränderung(Werte1[0],  Werte1[1],  Werte1[2], Werte1[3], Werte1[4], Mögliche_Züge2[b]);
+				boolean[]Condition3 = Condition(Werte2[0], Werte2[1], Werte2[2], Werte2[3], Werte2[4], GegnerKarten,  Mögliche_Züge2[b]);
+				Mögliche_Züge3 = ZugZuortnung(Condition3);
+				
+				for (int k = 0; k < Mögliche_Züge3.length; k ++ ) {
+						
+				    int[] Werte3 = Werteveränderung(Werte2[0],  Werte2[1],  Werte2[2], Werte2[3], Werte2[4], Mögliche_Züge3[k]);
+					boolean[]Condition4 = Condition(Werte3[0], Werte3[1], Werte3[2], Werte3[3], Werte3[4], GegnerKarten, Mögliche_Züge3[k]);
+					Mögliche_Züge4 = ZugZuortnung(Condition4);
+						
+					for (int h = 0; h < Mögliche_Züge4.length; h ++ ,e++) {
+			            Platzhalter2 [e][0] = Mögliche_Züge[i];
+			            Platzhalter2 [e][1] = Mögliche_Züge1[f] ;
+			            Platzhalter2 [e][2] = Mögliche_Züge2[b];
+			            Platzhalter2 [e][3] = Mögliche_Züge3[k];
+			            Platzhalter2 [e][4] = Mögliche_Züge4[h];
+			  }	
+		     }	
 			}
            }
+	      }
 	    
-	    String[][] Alle_Möglichkeiten = new String [e][3];
+	    String[][] Alle_Möglichkeiten = new String [e][5];
 	    for (int i = 0; i < e; i++){
-	       for (int j = 0; j < 3; j++){
+	       for (int j = 0; j < 5; j++){
 	       Alle_Möglichkeiten [i][j] = Platzhalter2 [i][j];
 	   }
 	  }
@@ -287,6 +333,16 @@ public class Logic implements IGameHandler {
 		return Alle_Möglichkeiten;
 	    
 	  }
+
+   
+   public String[] ZugSpeicher(String Zug){
+	
+	   int Zugint = 1;
+	   String[] ZugSpeicher = new String[Zugint];
+	   ZugSpeicher[Zugint-1] = Zug;
+	   Zugint++;
+	return ZugSpeicher;
+   }
 	    	    
     
     public Move calculateMove() {  
@@ -308,13 +364,15 @@ public class Logic implements IGameHandler {
     List < Move > Alle_Züge = gameState.getSensibleMoves();
     int Move = 0;
     int Anzahl_Mögliche_Züge = Alle_Züge.size();   
+    
+    gameState.getCurrentPlayer().getLastAction();
   
     int Feld_Dist = 0;
     int[] Zugweite = Zugweite(Alle_Züge, gameState);
-    boolean[]Condition = Condition(Eigene_Position, Eigene_Salate, Eigene_Karrotten, Karten[1], Karten[0] , GegnerKarten);
+    boolean[]Condition = Condition(Eigene_Position, Eigene_Salate, Eigene_Karrotten, Karten[1], Karten[0] , GegnerKarten, "nichts");
     int[] Dist = Dist(Eigene_Position);
     
-    String[][] Alle_Möglichkeiten = ZugMöglichkeiten(3);
+    String[][] Alle_Möglichkeiten = ZugMöglichkeiten(5);
    
     
     for (int i = 0; i < Condition.length; i++) {
@@ -330,9 +388,12 @@ public class Logic implements IGameHandler {
 	    }	
       }
     
+   String[]  ZugSpeicher =  ZugSpeicher(Gespielte_Schleife);
+    
+    
     switch (Gespielte_Schleife) {
      
-    case "Ziel Funktion","Vor Ziel Funktion", "Salat Funktion", "Markt Funktion", "Hasen Funktion", "Erste Position Funktion", "Zweite Position Funktion", "Karrotten Funktion","Igel Funktion": {
+    case "Ziel Funktion","Vor Ziel Funktion", "Salat Funktion", "Markt Funktion", "Hasen Funktion", "Erste Position Funktion", "Zweite Position Funktion", "Karrotten Funktion","Igel Funktion", "Salatfressen Funktion ": {
     	int Zugindex = 0;
     	for (int i = 0; i < Zugweite.length; i++) {
     	   if (Feld_Dist == Zugweite[i] ) {
@@ -358,9 +419,6 @@ public class Logic implements IGameHandler {
     }
       
     case "Karrotten abgeben Funktion" : Move = 2;
-    break;
-
-    case "Salatfressen Funktion ": Move = 0;
     break;
 
     case "nichts": Move = 0;
@@ -394,7 +452,7 @@ public class Logic implements IGameHandler {
                 System.out.print(  Alle_Möglichkeiten[i][j] + ", " );
             System.out.println();
         }
-    System.out.println("________________________________________________________________________");
+    System.out.println("________________________________________________________________________" + "\n");
 
     /*---------------------------------------------------------------------------------------------------------*/
 
