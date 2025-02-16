@@ -577,6 +577,7 @@ public class Logic implements IGameHandler {
   public void onGameOver(GameResult data) { //Wird aufgerufen, wenn das Spiel beendet ist.
 
     log.info("Das Spiel ist beendet, Ergebnis: {}", data);
+    System.out.println("Das Spiel ist beendet, Ergebnis: " + data);
     System.out.println("\033[1;35mGesamte Berechnungszeit: " + totalCalculationTime + "ms\033[0m");
  
   }
