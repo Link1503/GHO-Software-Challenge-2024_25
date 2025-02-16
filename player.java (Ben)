@@ -103,7 +103,7 @@ public class Logic implements IGameHandler {
 	    
 	    Field FeldTyp = gameState.getBoard().getField(Eigene_Position);
 	   
-		boolean[] Condition = new boolean[11];
+		boolean[] Condition = new boolean[13];
 	    Condition[0] = FeldTyp == Field.SALAD && VorherigerZug != "Salatfressen Funktion " ;
 	    if ( VorherigerZug == "nichts") {
 	    	Condition[0]= gameState.mustEatSalad(gameState.getCurrentPlayer());
@@ -332,19 +332,91 @@ public class Logic implements IGameHandler {
 	    
 		return Alle_Möglichkeiten;
 	    
-	  }
-
+	  }	
    
-   public String[] ZugSpeicher(String Zug){
+   public float Floatwerte_Anpassung (int[] VorherigeWerte, int [] AktuelleWerte, float Floatwert, String Zug){
 	
-	   int Zugint = 1;
-	   String[] ZugSpeicher = new String[Zugint];
-	   ZugSpeicher[Zugint-1] = Zug;
-	   Zugint++;
-	return ZugSpeicher;
+	   float Postion = 0.0f;
+	   
+	  switch(Zug){ 
+	  
+	  case "Ziel Funktion","Vor Ziel Funktion", "Salat Funktion", "Markt Funktion", "Hasen Funktion", "Erste Position Funktion", "Zweite Position Funktion", "Karrotten Funktion":{
+	  
+	   }
+	  case "Karrotten abgeben Funktion":{
+	 
+	   }
+	  case "Salatfressen Funktion ":{
+			 
+	   }
+	  case "Igel Funktion":{
+			 
+	   }
+	}
+
+	  Floatwert = Floatwert + Postion;
+	   return Floatwert; 
    }
-	    	    
-    
+   
+   public float[][] Floatwerte( String[][] Züge ) {
+	    int Eigene_Karrotten = gameState.getCurrentPlayer().getCarrots();
+	    int Eigene_Salate = gameState.getCurrentPlayer().getSalads(); 
+	    int Eigene_Position = gameState.getCurrentPlayer().getPosition();
+	    int[] Karten  = Karten(gameState.getCurrentPlayer().getCards());
+	    
+	   int[] Werte0 = {Eigene_Position,  Eigene_Salate,  Eigene_Karrotten, Karten[1], Karten[2]};
+
+	   float[][]Floatwerte = new float[Züge.length][6];
+	   float Floatwert = 0.0f;    
+	   String Zug = "nichts";
+	   
+	   
+	   for (int i = 0; i < Züge.length; i++){
+	       for (int j = 0; j < Züge[i].length ; j++){
+	    	   Zug = Züge [i][j];
+	    	   switch(Zug)  {
+	    	   case "Salatfressen Funktion " : Floatwert = 0.1f;
+	    	   case "Ziel Funktion": Floatwert = 0.1f;
+	    	   case "Karrotten abgeben Funktion": Floatwert = 0.1f;
+	    	   case "Vor Ziel Funktion": Floatwert = 0.1f;
+	    	   case "Salat Funktion": Floatwert = 0.1f;
+	    	   case "Markt Funktion": Floatwert = 0.1f;
+	    	   case "Hasen Funktion": Floatwert = 0.1f;
+	    	   case "Erste Position Funktion": Floatwert = 0.1f;
+	    	   case "Zweite Position Funktion": Floatwert = 0.1f;
+	    	   case "Igel Funktion": Floatwert = 0.1f;
+	    	   case "Karrotten Funktion": Floatwert = 0.1f;  
+	    	   
+	 	     }
+	    	 Floatwerte [i][j] = Floatwert;
+	    	 
+	       }
+	       int[] Werte = Werteveränderung(Eigene_Position,  Eigene_Salate,  Eigene_Karrotten, Karten[1], Karten[2],Züge [i][0]);
+	       Floatwerte [i][0] = Floatwerte_Anpassung (Werte0, Werteveränderung(Eigene_Position,  Eigene_Salate,  Eigene_Karrotten, Karten[1], Karten[2],Züge [i][0]),
+	                                         Floatwerte [i][0],Züge [i][0]);
+
+	       int[] Werte1 = Werteveränderung(Werte[0],  Werte[1],  Werte[2], Werte[3], Werte[4], Züge [i][1]);
+	       Floatwerte [i][1] = Floatwerte_Anpassung (Werteveränderung(Eigene_Position,  Eigene_Salate,  Eigene_Karrotten, Karten[1], Karten[2],Züge [i][0]),
+	                                         Werteveränderung(Werte[0],  Werte[1],  Werte[2], Werte[3], Werte[4], Züge [i][1]), Floatwerte [i][1],Züge [i][1]);
+
+	       int[] Werte2 = Werteveränderung(Werte1[0],  Werte1[1],  Werte1[2], Werte1[3], Werte1[4], Züge [i][2]);
+	       Floatwerte [i][2] = Floatwerte_Anpassung (Werteveränderung(Werte[0],  Werte[1],  Werte[2], Werte[3], Werte[4], Züge [i][1]),
+	                                         Werteveränderung(Werte1[0],  Werte1[1],  Werte1[2], Werte1[3], Werte1[4], Züge [i][2]), Floatwerte [i][2],Züge [i][2]);
+
+	       int[] Werte3 = Werteveränderung(Werte2[0],  Werte2[1],  Werte2[2], Werte2[3], Werte2[4], Züge [i][3]);
+	       Floatwerte [i][3] = Floatwerte_Anpassung (Werteveränderung(Werte1[0],  Werte1[1],  Werte1[2], Werte1[3], Werte1[4], Züge [i][2]),
+	                                         Werteveränderung(Werte2[0],  Werte2[1],  Werte2[2], Werte2[3], Werte2[4], Züge [i][3]), Floatwerte [i][3],Züge [i][3]);
+	    
+	       int[] Werte4 = Werteveränderung(Werte3[0],  Werte3[1],  Werte3[2], Werte3[3], Werte3[4], Züge [i][4]);
+	       Floatwerte [i][4] = Floatwerte_Anpassung (Werteveränderung(Werte2[0],  Werte2[1],  Werte2[2], Werte2[3], Werte2[4], Züge [i][3]),
+	                                         Werteveränderung(Werte3[0],  Werte3[1],  Werte3[2], Werte3[3], Werte3[4], Züge [i][4]), Floatwerte [i][4],Züge [i][4]);
+	       
+	       Floatwerte [i][5] = Floatwerte [i][0] + Floatwerte [i][1] + Floatwerte [i][2] + Floatwerte [i][3] + Floatwerte [i][4];
+	     } 
+	   return  Floatwerte; 
+   }
+   
+
     public Move calculateMove() {  
 
     long startTime = System.currentTimeMillis(); // zum messen der Zeit 
@@ -372,8 +444,10 @@ public class Logic implements IGameHandler {
     boolean[]Condition = Condition(Eigene_Position, Eigene_Salate, Eigene_Karrotten, Karten[1], Karten[0] , GegnerKarten, "nichts");
     int[] Dist = Dist(Eigene_Position);
     
+    
     String[][] Alle_Möglichkeiten = ZugMöglichkeiten(5);
-   
+    float[][] Alle_Möglichkeiten_Floatwerte = Floatwerte(ZugMöglichkeiten(5));
+    
     
     for (int i = 0; i < Condition.length; i++) {
     
@@ -387,10 +461,7 @@ public class Logic implements IGameHandler {
     	continue;
 	    }	
       }
-    
-   String[]  ZugSpeicher =  ZugSpeicher(Gespielte_Schleife);
-    
-    
+  
     switch (Gespielte_Schleife) {
      
     case "Ziel Funktion","Vor Ziel Funktion", "Salat Funktion", "Markt Funktion", "Hasen Funktion", "Erste Position Funktion", "Zweite Position Funktion", "Karrotten Funktion","Igel Funktion", "Salatfressen Funktion ": {
@@ -444,14 +515,15 @@ public class Logic implements IGameHandler {
     System.out.println(Arrays.toString(Zugweite) + "\n");
     System.out.println("Gespielter Zug: " + move + " ; " + Move + "\n");
     System.out.println("Eigendes Feld: " + Eigne_FeldTyp + " auf Position: " + Eigene_Position + "\n");
-    System.out.println("Gespielte Schleife: \033[1;91m" + Gespielte_Schleife + "\u001B[0m\n\n");
+    System.out.println("Gespielte Schleife: \033[1;91m" + Gespielte_Schleife + "\u001B[0m\n");
     System.out.println("Karten =  " + "Saladfressen: " + Karten[0] + " | " + "Karotten tauschen: " + Karten[1] + " | " + "Zurückfallen: " + Karten[2] + " | " + "Vorrücken: " + Karten[3] + "\n");
     System.out.println("Karten-Gegner =  " + "Saladfressen: " + GegnerKarten[0] + " | " + "Karotten tauschen: " + GegnerKarten[1] + " | " + "Zurückfallen: " + GegnerKarten[2] + " | " + "Vorrücken: " + GegnerKarten[3] + "\n");
     for (int i = 0; i <  Alle_Möglichkeiten.length; i++){
-            for (int j = 0; j < Alle_Möglichkeiten[i].length; j++)
-                System.out.print(  Alle_Möglichkeiten[i][j] + ", " );
-            System.out.println();
-        }
+    	System.out.println("\u001B[32m Gesamtwert ==>  " + Alle_Möglichkeiten_Floatwerte[i][5] + "\u001B[0m");
+        for (int j = 0; j < Alle_Möglichkeiten[i].length ; j++)
+        	System.out.print(Alle_Möglichkeiten[i][j] + " : " + Alle_Möglichkeiten_Floatwerte[i][j] + " | ");
+        System.out.println();
+    }
     System.out.println("________________________________________________________________________" + "\n");
 
     /*---------------------------------------------------------------------------------------------------------*/
