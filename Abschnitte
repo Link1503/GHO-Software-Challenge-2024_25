@@ -1,0 +1,134 @@
+public int[] Werteveränderung(int Eigene_Position, int Eigene_Salate, int Eigene_Karrotten, int SWAP_CARROTS, int EAT_SALAD, int HURRY_AHEAD, int FALL_BACK,String Zug ){
+	   
+	  int Gegner_Position = gameState.getOtherPlayer().getPosition();
+	  int Gengner_Karroten = gameState.getOtherPlayer().getCarrots();
+	  int[] GegnerKarten  = Karten(gameState.getOtherPlayer().getCards());
+	  int [] Dist = Dist(Eigene_Position);
+	  int Dist_Feld =0;
+	  for (int i = 0; i < Schleife.length; i++) {
+	    	if (Schleife[i] == Zug ) {
+	    	Dist_Feld = Dist[i];
+			break;
+	    	}
+	    	else {
+	    	continue;
+		    }	
+	      }
+	  
+	  switch(Zug)  {
+	  
+	  case "MARKET EAT_SALAD": {
+		  Eigene_Position = Eigene_Position + Dist_Feld;
+		  EAT_SALAD ++;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	  }
+	  
+	  case "MARKET SWAP_CARROTS": {
+		  Eigene_Position = Eigene_Position + Dist_Feld;
+		  SWAP_CARROTS ++;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	  }
+	  
+	  case "MARKET HURRY_AHEAD": {
+		  Eigene_Position = Eigene_Position + Dist_Feld;
+		  HURRY_AHEAD ++;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	  }
+	  
+	  case "MARKET FALL_BACK": {
+		  Eigene_Position = Eigene_Position + Dist_Feld;
+		  FALL_BACK ++;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	  }
+	  
+	  case "SALAD": {
+		  Eigene_Position = Eigene_Position + Dist_Feld;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	  }
+	  
+	  
+	  case "EAT SALAD": {
+		  Eigene_Salate --;
+		  if(Eigene_Position < Gegner_Position){ 
+			Eigene_Karrotten = Eigene_Karrotten +30;
+		  }
+		  if(Eigene_Position > Gegner_Position){ 
+			  Eigene_Karrotten = Eigene_Karrotten +10;
+		  }
+	  }
+	  
+	  case "HARE EAT_SALAD": {
+		  Eigene_Position = Eigene_Position + Dist_Feld;
+		  Eigene_Salate --;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+		  Eigene_Salate --;
+		  if(Eigene_Position < Gegner_Position){ 
+			Eigene_Karrotten = Eigene_Karrotten +30;
+		  }
+		  if(Eigene_Position > Gegner_Position){ 
+			  Eigene_Karrotten = Eigene_Karrotten +10;
+		  }
+	  }
+	  
+	  case "HARE SWAP_CARROTS": {
+		  Eigene_Position = Eigene_Position + Dist_Feld;
+		  Eigene_Salate --;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+		  SWAP_CARROTS --;
+
+		    int temp = Eigene_Karrotten;
+		    Eigene_Karrotten = Gengner_Karroten;
+		    Gengner_Karroten = temp;
+		}
+	  
+	  case "HARE HURRY_AHEAD": {
+		  Eigene_Position = + Gegner_Position;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	  }
+	  
+	  case "HARE FALL_BACK": {
+		  Eigene_Position = - Gegner_Position;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	     }
+	  
+	  case "HEDGEHOG": {
+		  Eigene_Position = Eigene_Position - Dist_Feld;
+		  Eigene_Karrotten = Eigene_Karrotten + ( 10 * Dist_Feld);
+	  }
+	
+	  case "POSITION_2": {
+		  Eigene_Position = Eigene_Position + Dist_Feld;
+		  Eigene_Karrotten = Eigene_Karrotten + 30;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	  }
+	  
+	  case "POSITION_1": {
+		  Eigene_Position = Eigene_Position + Dist_Feld;
+		  Eigene_Karrotten = Eigene_Karrotten + 10;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	  }  
+	  
+	  case "CARROTS": {
+		  Eigene_Position = Eigene_Position + Dist_Feld;
+		  Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	  }  
+	  
+	  case "GOAL": {
+		  if (Eigene_Karrotten <= 10 && Eigene_Salate == 0) { 
+		        Eigene_Position = Eigene_Position + Dist_Feld;
+		        Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Dist_Feld);
+	  }
+	  
+	  }
+	  
+	  }
+	  
+	  int[] Werteveränderung =  new int[5];
+	  Werteveränderung[0] = Eigene_Position;
+	  Werteveränderung[1] = Eigene_Salate;
+	  Werteveränderung[2] = Eigene_Karrotten;
+      Werteveränderung[3] = SWAP_CARROTS;
+      Werteveränderung[4] = EAT_SALAD;
+	  
+	return Werteveränderung;
+	 }
