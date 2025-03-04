@@ -97,7 +97,7 @@ public class Logic implements IGameHandler {
         Condition[12] =  Eigene_Position != Feld && Gegner_Position != Feld && Gegner_Position < Eigene_Position && Gegner_Position < Feld;
         Condition[13] =  Eigene_Position != Feld && Gegner_Position != Feld && Feld == Pre_Goal && Eigene_Salate == 0 ;
         Condition[14] =  Eigene_Position == Pre_Goal   && Eigene_Karrotten  > 10 && Eigene_Salate == 0 ;
-        Condition[15] =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) <= 10 && Eigene_Salate == 0;
+        Condition[15] =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) <= 10 && Eigene_Salate == 0 && gameState.getBoard().getField(Feld) == Field.GOAL;
 
         return Condition;
     }
@@ -254,7 +254,7 @@ public class Logic implements IGameHandler {
         int Eigene_Position =  Werte[0];
         int Felder_int = 0;
 
-        int[] P_ZugZuortnung = new int[reichweite.length + 10];
+        int[] P_ZugZuortnung = new int[30];
         int ZugZuortnung_int = 0;
 
         for (int i = 0; i < reichweite.length; i++) {
@@ -626,11 +626,11 @@ public class Logic implements IGameHandler {
                 switch(Zug)  {
                     case "MARKET EAT_SALAD": Floatwert =  0.3f;
                     break;
-                    case "MARKET SWAP_CARROTS":Floatwert =  0.1f;
+                    case "MARKET SWAP_CARROTS":Floatwert =  0.0f;
                     break;
-                    case "MARKET HURRY_AHEAD":Floatwert =  0.1f;
+                    case "MARKET HURRY_AHEAD":Floatwert =  0.0f;
                     break;
-                    case "MARKET FALL_BACK":Floatwert =  0.1f;
+                    case "MARKET FALL_BACK":Floatwert =  0.0f;
                     break;
                     case "SALAD":Floatwert =  0.8f;
                     break;
@@ -638,17 +638,17 @@ public class Logic implements IGameHandler {
                     break;
                     case "HARE EAT_SALAD":Floatwert =  0.5f;
                     break;
-                    case "HARE SWAP_CARROTS":Floatwert =  0.3f;
+                    case "HARE SWAP_CARROTS":Floatwert =  0.0f;
                     break;
-                    case "HARE HURRY_AHEAD":Floatwert =  0.1f;
+                    case "HARE HURRY_AHEAD":Floatwert =  0.0f;
                     break;
-                    case "HARE FALL_BACK":Floatwert =  0.1f;
+                    case "HARE FALL_BACK":Floatwert =  0.0f;
                     break;
                     case "HEDGEHOG":Floatwert =  0.2f;
                     break;
-                    case "POSITION_2":Floatwert =  0.2f;
+                    case "POSITION_2":Floatwert =  0.1f;
                     break;
-                    case "POSITION_1":Floatwert =  0.2f;
+                    case "POSITION_1":Floatwert =  0.1f;
                     break;
                     case "PRE GOAL":Floatwert =  1.0f;
                     break;
@@ -763,6 +763,8 @@ public class Logic implements IGameHandler {
         int Anzahl_Mögliche_Züge = Alle_Züge.size();
         gameState.getCurrentPlayer().getLastAction();
         int[] Zugweite = Zugweite(Alle_Züge, gameState);
+        
+        
 
         
         String[][][] Platzhaltzer = ZugMöglichkeiten(5);
@@ -797,28 +799,22 @@ public class Logic implements IGameHandler {
                     break;
          	   }
               } 
-        	
           int Karte = 0; 
-            if (Zugauswahl == "MARKET EAT_SALAD" ||Zugauswahl ==  "HARE EAT_SALAD ") {
-              Karte = 0; // Karroten tauschen
-            }
-            if (Zugauswahl == "MARKET SWAP_CARROTS" ||Zugauswahl ==   "HARE SWAP_CARROTS") {
-                Karte = 1; // Karroten tauschen
-              }
-            if (Zugauswahl == "MARKET HURRY_AHEAD" ||Zugauswahl ==  "HARE HURRY_AHEAD") {
-                Karte = 2; // Karroten tauschen
-              }
-            if (Zugauswahl == "MARKET FALL_BACK" ||Zugauswahl ==  "HARE FALL_BACK") {
-                Karte = 3; // Karroten tauschen
-              }
-
+          switch (Zugauswahl) { 
+          case "MARKET EAT_SALAD" : Karte = 0;
+          case "MARKET SWAP_CARROTS" : Karte = 1;
+          case "MARKET HURRY_AHEAD" : Karte = 2;
+          case "MARKET FALL_BACK" : Karte = 3;
+          case "HARE EAT_SALAD" : Karte = 0;
+          case "HARE SWAP_CARROTS" : Karte = 0 ;
+          case "HARE HURRY_AHEAD" : Karte = 0 ;
+          case "HARE FALL_BACK" : Karte = 0 ;
+          }
           Move = Zugindex + Karte;
         }
-        break;
-          
+        break;  
         case "LOSS CARROTS" : Move = 2;
         break;
-
         }
         
         int[] Werte0 = {Eigene_Position, Eigene_Salate, Eigene_Karrotten, Karten[0], Karten[1] , Karten[2] ,Karten[3]};
@@ -849,24 +845,7 @@ public class Logic implements IGameHandler {
         System.out.println("\u001B[7m\u001B[1;33mBester Zug: " + Zugauswahl +  "\u001B[0m" +"\n");
         System.out.println(Arrays.asList(ZugZuortnung_Name(reichweite(Eigene_Position,  Eigene_Karrotten), Werte0 , "nichts")));
         System.out.println(Arrays.toString(ZugZuortnung_int(reichweite(Eigene_Position,  Eigene_Karrotten), Werte0, "nichts")));
-        System.out.println(separator);
-        System.out.printf("| %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidthEndwert + "s |\n",
-                "Zug1", "Zug2", "Zug3", "Zug4", "Endwert");
-        System.out.println(separator);
-        for (int i = 0; i < alleMöglichkeiten.length; i++) {
-            String ZugFarbe = "\u001B[32m";
-            if(alleMöglichkeitenFloatwerte[i][4] != endwert) {
-                ZugFarbe = "\u001B[0m";
-            }
-
-            System.out.printf("| %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidth + "s | %-"  + columnWidthEndwert + "s |\n",
-                    alleMöglichkeiten[i][0] + " : " + String.format("%.2f", alleMöglichkeitenFloatwerte[i][0]),
-                    alleMöglichkeiten[i][1] + " : " + String.format("%.2f", alleMöglichkeitenFloatwerte[i][1]),
-                    alleMöglichkeiten[i][2] + " : " + String.format("%.2f", alleMöglichkeitenFloatwerte[i][2]),
-                    alleMöglichkeiten[i][3] + " : " + String.format("%.2f", alleMöglichkeitenFloatwerte[i][3]),
-                    ZugFarbe + String.format("%.2f", alleMöglichkeitenFloatwerte[i][4]) + "\u001B[0m");
-        }
-        System.out.println(separator);
+        
         /*---------------------------------------------------------------------------------------------------------*/
         if (gameState.getTurn() >= 60) {
             System.out.println("\033[1;35mGesamte Berechnungszeit: " + totalCalculationTime + "ms\033[0m");
