@@ -731,7 +731,7 @@ public class Logic implements IGameHandler {
                 Zug = Züge [i][j];
                 switch(Zug)  {
                 
-                    case "MARKET EAT_SALAD": Floatwert =  0.4f;
+                    case "MARKET EAT_SALAD": Floatwert =  0.5f;
                     break;
                     case "MARKET SWAP_CARROTS":Floatwert =  0.0f;
                     break;
@@ -739,11 +739,11 @@ public class Logic implements IGameHandler {
                     break;
                     case "MARKET FALL_BACK":Floatwert =  0.0f;
                     break;
-                    case "SALAD":Floatwert =  0.8f;
+                    case "SALAD":Floatwert =  0.9f;
                     break;
                     case "EAT SALAD":Floatwert =  0.0f;
                     break;
-                    case "HARE EAT_SALAD":Floatwert =  0.4f;
+                    case "HARE EAT_SALAD":Floatwert =  0.6f;
                     break;
                     case "HARE SWAP_CARROTS":Floatwert =  0.0f;
                     break;
@@ -751,7 +751,7 @@ public class Logic implements IGameHandler {
                     break;
                     case "HARE FALL_BACK":Floatwert =  0.0f;
                     break;
-                    case "HEDGEHOG":Floatwert =  0.1f;
+                    case "HEDGEHOG":Floatwert =  0.05f;
                     break;
                     case "POSITION_2":Floatwert =  0.3f;
                     break;
