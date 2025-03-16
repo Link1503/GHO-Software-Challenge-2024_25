@@ -95,22 +95,22 @@ public class Logic implements IGameHandler {
         Field FeldTyp = gameState.getBoard().getField(Eigene_Position);
 
         boolean[] Condition = new boolean[17];
-        Condition[0]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && Eigene_Salate != 0;
-        Condition[1]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && SWAP_CARROTS > 0;
-        Condition[2]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && HURRY_AHEAD > 0;
-        Condition[3]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && FALL_BACK > 0;
-        Condition[4]  =  Eigene_Position != Feld && Eigene_Salate != 0 && Gegner_Position != Feld;
+        Condition[0]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && Eigene_Salate != 0&& gameState.getBoard().getField(Feld) == Field.MARKET;
+        Condition[1]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && SWAP_CARROTS > 0&& gameState.getBoard().getField(Feld) == Field.MARKET;
+        Condition[2]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && HURRY_AHEAD > 0&& gameState.getBoard().getField(Feld) == Field.MARKET;
+        Condition[3]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && FALL_BACK > 0&& gameState.getBoard().getField(Feld) == Field.MARKET;
+        Condition[4]  =  Eigene_Position != Feld && Eigene_Salate != 0 && Gegner_Position != Feld&& gameState.getBoard().getField(Feld) == Field.SALAD;
         Condition[5]  =  Gegner_Position != Feld && FeldTyp == Field.SALAD && Eigene_Salate != 0;
-        Condition[6]  =  Eigene_Position != Feld && Eigene_Salate != 0 && EAT_SALAD != 0 && Gegner_Position != Feld;
-        Condition[7]  =  Eigene_Position != Feld && SWAP_CARROTS != 0 && Feld > 57 && Gegner_Position != Feld;
-        Condition[8]  =  Eigene_Position != Feld && HURRY_AHEAD != 0 && Eigene_Position < Gegner_Position && Gegner_Position != Feld ;
-        Condition[9]  =  Eigene_Position != Feld && FALL_BACK != 0 && Eigene_Position > Gegner_Position && Gegner_Position != Feld ;
-        Condition[10] =  Eigene_Position != Feld && Gegner_Position != Feld && (Eigene_Position - Feld) * 10 > 20;
-        Condition[11] =  Eigene_Position != Feld && Gegner_Position != Feld && Gegner_Position > Eigene_Position && Gegner_Position > Feld;
-        Condition[12] =  Eigene_Position != Feld && Gegner_Position != Feld && Gegner_Position < Eigene_Position && Gegner_Position < Feld;
-        Condition[13] =  Eigene_Position != Feld && Gegner_Position != Feld && Feld == Pre_Goal && Eigene_Salate == 0 ;
-        Condition[14] =  Eigene_Position == Pre_Goal   && Eigene_Karrotten  > 10 && Eigene_Salate == 0 ;
-        Condition[15] =  Eigene_Position != Feld && Gegner_Position != Feld &&  Feld_int > 3 && Eigene_Karrotten > 30 && Feld != Pre_Goal ;
+        Condition[6]  =  Eigene_Position != Feld && Eigene_Salate != 0 && EAT_SALAD != 0 && Gegner_Position != Feld&& gameState.getBoard().getField(Feld) == Field.HARE;
+        Condition[7]  =  Eigene_Position != Feld && SWAP_CARROTS != 0 && Feld > 57 && Gegner_Position != Feld&& gameState.getBoard().getField(Feld) == Field.HARE;
+        Condition[8]  =  Eigene_Position != Feld && HURRY_AHEAD != 0 && Eigene_Position < Gegner_Position && Gegner_Position != Feld && gameState.getBoard().getField(Feld) == Field.HARE;
+        Condition[9]  =  Eigene_Position != Feld && FALL_BACK != 0 && Eigene_Position > Gegner_Position && Gegner_Position != Feld&& gameState.getBoard().getField(Feld) == Field.HARE ;
+        Condition[10] =  Eigene_Position != Feld && Gegner_Position != Feld && (Eigene_Position - Feld) * 10 > 20 && Eigene_Karrotten < 120&& gameState.getBoard().getField(Feld) == Field.HEDGEHOG ;
+        Condition[11] =  Eigene_Position != Feld && Gegner_Position != Feld && Gegner_Position > Eigene_Position && Gegner_Position > Feld&& gameState.getBoard().getField(Feld) == Field.POSITION_2;
+        Condition[12] =  Eigene_Position != Feld && Gegner_Position != Feld && Gegner_Position < Eigene_Position && Gegner_Position < Feld&& gameState.getBoard().getField(Feld) == Field.POSITION_1;
+        Condition[13] =  Eigene_Position != Feld && Gegner_Position != Feld && Feld == Pre_Goal && Eigene_Salate == 0 && Condition[16] == false&& gameState.getBoard().getField(Feld) == Field.CARROTS ;
+        Condition[14] =  Eigene_Position == Pre_Goal   && Eigene_Karrotten  > 10 && Eigene_Salate == 0 && Condition[16] == false && gameState.getBoard().getField(Feld) == Field.CARROTS ;
+        Condition[15] =  Eigene_Position != Feld && Gegner_Position != Feld &&  Feld_int > 3 && Feld != Pre_Goal && Condition[16] == false&& gameState.getBoard().getField(Feld) == Field.CARROTS  ;
         Condition[16] =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) <= 10 && Eigene_Salate == 0 && gameState.getBoard().getField(Feld) == Field.GOAL;
 
         return Condition;
@@ -260,10 +260,18 @@ public class Logic implements IGameHandler {
 		}
 	
 		
-		String[] ZugZuortnung = new String[ZugZuortnung_int];
-	    for (int i = 0; i < ZugZuortnung_int; i++) {
-	    	ZugZuortnung[i] = P_ZugZuortnung[i];
-	     }	
+		String[] ZugZuortnung = null;
+        if(ZugZuortnung_int == 0) {
+           ZugZuortnung = new String[1];
+        	ZugZuortnung[0] = "nichts";
+        } 
+        else {
+        ZugZuortnung = new String[ZugZuortnung_int < 12 ? ZugZuortnung_int : 12];
+        for (int i = 0 , j = 0; i < ZugZuortnung_int &&  i < 12; i++, j++) { 
+                ZugZuortnung[i] = P_ZugZuortnung[j];
+            }
+         
+        }
 		   return ZugZuortnung;
 	   }
 	public int[] ZugZuortnung_int(int[] reichweite, int[] Werte, String Vorheriger_Zug ){
@@ -381,14 +389,18 @@ public class Logic implements IGameHandler {
     			  break;
     		  } 
           }
-       
-
-          
-        int[] ZugZuortnung = new int[ZugZuortnung_int];
-        for (int i = 0 , j = 0; i < ZugZuortnung_int; i++, j++) { 
+        int[] ZugZuortnung = null;
+        if(ZugZuortnung_int == 0) {
+           ZugZuortnung = new int[1];
+        	ZugZuortnung[0] = 0;
+        } 
+        else {
+        ZugZuortnung = new int[ZugZuortnung_int < 12 ? ZugZuortnung_int : 12];
+        for (int i = 0 , j = 0; i < ZugZuortnung_int && i < 12; i++, j++) { 
                 ZugZuortnung[i] = P_ZugZuortnung[j];
             }
          
+        }
            return ZugZuortnung;
        }
 
@@ -561,9 +573,9 @@ public class Logic implements IGameHandler {
     	int[] Mögliche_Züge_int = ZugZuortnung_int(reichweite(Eigene_Position, Eigene_Karrotten), Werte0 , "nichts");
         String[][][] Platzhalter2 = new String[100000][MengeAnWiederholungen][2];
         String[] EAT_SALAT = {"EAT SALAD"};
-        String[] Mögliche_Züge2 = null;
-        String[] Mögliche_Züge1 = null;
-        String[] Mögliche_Züge3 = null;
+        String[] Mögliche_Züge2 = {"nichts"};
+        String[] Mögliche_Züge1 = {"nichts"};
+        String[] Mögliche_Züge3 = {"nichts"};
         int e = 0;
         
         for(int i = 0 ; i < Mögliche_Züge.length ; i++){
@@ -575,7 +587,6 @@ public class Logic implements IGameHandler {
             else {
             Mögliche_Züge1 = ZugZuortnung_Name(reichweite(Werte[0], Werte[2]), Werte, Mögliche_Züge[i]);
             }
-
             for (int f = 0; f <  Mögliche_Züge1.length; f++) {
 
                 int[] Werte1 = Werteveränderung(Werte, Mögliche_Züge1[f], Mögliche_Züge1_int[f]); 
@@ -630,83 +641,75 @@ public class Logic implements IGameHandler {
  	   int SWAP_CARROTSZähler = AktuelleWerte[3] - VorherigeWerte[3];
  	   int EAT_SALADZähler = AktuelleWerte[4] - VorherigeWerte[4];
  	   
+ 	   if(AktuelleWerte[0] > 40) {
+ 		  
+ 	   }
+ 	   
  	   switch (Zug) {
  	   
 	 	  case "MARKET EAT_SALAD":{
-	 		 Floatwert = Floatwert * VorherigeWerte[1];
-	 		Floatwert = Floatwert * Gegangende_Dist/2;
-	 		 
-	 		 if(AktuelleWerte[0] > 50  && AktuelleWerte[1] == 0 || AktuelleWerte[4] >= AktuelleWerte[1]) {
-	 			Floatwert = 0.0f;
-	 		 }
+	 		
 	 	  }
 	      break;
-	      case "MARKET SWAP_CARROTS":Floatwert =  0.0f;
-	      Floatwert = Floatwert * Gegangende_Dist/2;
-	      if(AktuelleWerte[0] > 50) {
-	 			Floatwert = 0.0f;
+	      case "MARKET SWAP_CARROTS":{
 	 		 }
 	      break;
-	      case "MARKET HURRY_AHEAD":Floatwert =  0.0f;
-	      Floatwert = Floatwert * Gegangende_Dist/2;
-	      if(AktuelleWerte[0] > 50) {
-	 			Floatwert = 0.0f;
+	      case "MARKET HURRY_AHEAD":{
+	    	  
 	 		 }
 	      break;
-	      case "MARKET FALL_BACK":Floatwert =  0.0f;
-	      Floatwert = Floatwert * Gegangende_Dist/2;
-	      if(AktuelleWerte[0] > 50) {
-	 			Floatwert = 0.0f;
+	      case "MARKET FALL_BACK":{
 	 		 }
 	      break;
 	      case "SALAD":{
-	    	  Floatwert = Floatwert * AktuelleWerte[1];
-	    	  Floatwert = Floatwert * Gegangende_Dist/2;
-	      }
+              Floatwert = Floatwert * AktuelleWerte[1];
+              if (AktuelleWerte[0] < 50) {
+                  Floatwert = Floatwert * (64 - AktuelleWerte[0]) / 20; 
+              }
+          }
 	      break;
 	      case "EAT SALAD":{
 	    	  Floatwert = Floatwert * AktuelleWerte[1];
-	    	  Floatwert = Floatwert * Gegangende_Dist/2;
 	      }
 	      break;
 	      case "HARE EAT_SALAD":{
 	    	  Floatwert = Floatwert * VorherigeWerte[1];
 	    	  Floatwert = Floatwert * Gegangende_Dist/2;
+	    	  if (AktuelleWerte[0] < 50) {
+                  Floatwert = Floatwert * (64 - AktuelleWerte[0]) / 20; 
+              }
 	      }
 	      break;
-	      case "HARE SWAP_CARROTS":Floatwert =  0.0f;
-	      Floatwert = Floatwert * Gegangende_Dist/2;
-	      if(AktuelleWerte[0] > 50) {
-	 			Floatwert = 0.0f;
-	 		 }
+	      case "HARE SWAP_CARROTS":{
+	    	  
+	 	  }
 	      break;
-	      case "HARE HURRY_AHEAD":Floatwert =  0.0f;
-	      Floatwert = Floatwert * Gegangende_Dist/2;
-	      if(AktuelleWerte[0] > 50) {
-	 			Floatwert = 0.0f;
-	 		 }
+	      case "HARE HURRY_AHEAD":{
+	    	  
+	 	  }
 	      break;
-	      case "HARE FALL_BACK":Floatwert =  0.0f;
-	      Floatwert = Floatwert * Gegangende_Dist/2;
-	      if(AktuelleWerte[0] > 50) {
-	 			Floatwert = 0.0f;
-	 		 }
+	      case "HARE FALL_BACK":{
+	    	  
+	      }
 	      break;
 	      case "HEDGEHOG":{
-	    	  if(AktuelleWerte[0] > 40) {
-	    		  Floatwert = Floatwert * ((10 *AktuelleWerte[0])/AktuelleWerte[2]/2) ;
+	    	  if(AktuelleWerte[2] > 100) {
+	    		  Floatwert = Floatwert * -10;
 	    	  }
 	      }
 	      break;
-	      case "POSITION_2":Floatwert =  0.1f;
-	      Floatwert = Floatwert * Gegangende_Dist/2;
+	      case "POSITION_2":{
+	      
 	      break;
-	      case "POSITION_1":Floatwert =  0.1f;
-	      Floatwert = Floatwert * Gegangende_Dist;
+	      }
+	      case "POSITION_1":{
+	      
 	      break;
-	      case "CARROT" : Floatwert =  0.1f;
-	      Floatwert = Floatwert * Gegangende_Dist;
+	      }
+	      case "CARROT" :{
+	      
 	      break;
+	      }
 	    
  	   }
 
@@ -739,11 +742,11 @@ public class Logic implements IGameHandler {
                     break;
                     case "MARKET FALL_BACK":Floatwert =  0.0f;
                     break;
-                    case "SALAD":Floatwert =  0.9f;
+                    case "SALAD":Floatwert =  1.0f;
                     break;
-                    case "EAT SALAD":Floatwert =  0.0f;
+                    case "EAT SALAD":Floatwert =  0.2f;
                     break;
-                    case "HARE EAT_SALAD":Floatwert =  0.6f;
+                    case "HARE EAT_SALAD":Floatwert =  0.5f;
                     break;
                     case "HARE SWAP_CARROTS":Floatwert =  0.0f;
                     break;
@@ -753,17 +756,19 @@ public class Logic implements IGameHandler {
                     break;
                     case "HEDGEHOG":Floatwert =  0.05f;
                     break;
-                    case "POSITION_2":Floatwert =  0.3f;
+                    case "POSITION_2":Floatwert =  0.1f;
                     break;
-                    case "POSITION_1":Floatwert =  0.3f;
+                    case "POSITION_1":Floatwert =  0.2f;
                     break;
                     case "PRE GOAL":Floatwert =  1.0f;
                     break;
                     case "LOSS CARROTS":Floatwert =  1.0f;
                     break;
-                    case "CARROT":Floatwert =  0.1f;
+                    case "CARROT":Floatwert =  0.2f;
                     break;
                     case "GOAL":Floatwert =  2.0f;
+                    break;
+                    case "nichts":Floatwert =  0.0f;
                     break;
                 }
                 Floatwerte [i][j] = Floatwert;   
@@ -779,15 +784,6 @@ public class Logic implements IGameHandler {
             Floatwerte [i][3] = Floatwerte_Anpassung (Werte2, Werte3, Floatwerte [i][3],Züge [i][3]);
 
             
-            for (int e = 0; e < Floatwerte.length; e++){
-                for (int j = 0; j < Floatwerte[i].length ; j++){
-                    if (Floatwerte[e][j] <= 0.0f) {
-                        Floatwerte [e][j] = 0.0f;
-                    } else {
-                        continue;
-                    }
-                }
-            }
 
             Floatwerte [i][4] = Floatwerte [i][0]/1 + Floatwerte [i][1]/2 + Floatwerte [i][2]/3 + Floatwerte [i][3]/4;
         }
@@ -909,7 +905,7 @@ public class Logic implements IGameHandler {
         switch (Zugauswahl) {
         
         case "MARKET EAT_SALAD", "MARKET SWAP_CARROTS", "MARKET HURRY_AHEAD", "MARKET FALL_BACK", "SALAD", "EAT SALAD", "HARE EAT_SALAD",
-              "HARE SWAP_CARROTS", "HARE HURRY_AHEAD", "HARE FALL_BACK", "HEDGEHOG", "POSITION_2", "POSITION_1", "PRE GOAL", "GOAL" , "CARROT": {
+              "HARE SWAP_CARROTS", "HARE HURRY_AHEAD", "HARE FALL_BACK", "HEDGEHOG", "POSITION_2", "POSITION_1", "PRE GOAL", "GOAL" , "CARROT" ,"LOSS CARROTS": {
         	int Zugindex = 0;
         	for (int i = 0; i < Zugweite.length; i++) {
          	   if (Zugweite[i] ==  zugwahl) {
@@ -917,32 +913,45 @@ public class Logic implements IGameHandler {
                     break;
          	   }
               } 
-          int Karte = 0; 
+          int Modifikation = 0; 
           switch (Zugauswahl) { 
-          case "MARKET EAT_SALAD" : Karte = 0;
+          case "MARKET EAT_SALAD" : Modifikation = 0;
           break;
-          case "MARKET SWAP_CARROTS" : Karte = 1;
+          case "MARKET SWAP_CARROTS" : Modifikation = 1;
           break;
-          case "MARKET HURRY_AHEAD" : Karte = 2;
+          case "MARKET HURRY_AHEAD" : Modifikation = 2;
           break;
-          case "MARKET FALL_BACK" : Karte = 3;
+          case "MARKET FALL_BACK" : Modifikation = 3;
           break;
-          case "HARE EAT_SALAD" : Karte = 0;
+          case "HARE EAT_SALAD" : Modifikation = 0;
           break;
-          case "HARE SWAP_CARROTS" : Karte = 0;
+          case "HARE SWAP_CARROTS" : Modifikation = 0;
           break;
-          case "HARE HURRY_AHEAD" : Karte = 0 ;
+          case "HARE HURRY_AHEAD" : Modifikation = 0 ;
           break;
-          case "HARE FALL_BACK" : Karte = 0 ;
+          case "HARE FALL_BACK" : Modifikation = 0 ;
+          break;
+          case "LOSS CARROTS" : Modifikation = 1 ;
           break;
           }
-          Move = Zugindex + Karte;
+          Move = Zugindex + Modifikation;
         }
-        break;  
-        case "LOSS CARROTS" : Move = 2;
-        break;
         }
         
+        if ( Eigene_Position != 64 && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(64 - Eigene_Position)) <= 10 && Eigene_Salate == 0 
+        	&&  GameRuleLogic.INSTANCE.calculateMoveableFields(Eigene_Karrotten) == (64 - Eigene_Position)  || gameState.getCurrentPlayer().getCanEnterGoal() == true) {
+            int Zugindex = 0;
+            for (int i = 0; i < Zugweite.length; i++) {
+                 if (Zugweite[i] + Eigene_Position ==  64) {
+                     Zugindex = i;
+                     break;
+                 }
+            }
+            Move = Zugindex;
+        }
+        if (Eigene_Position == 63 && Eigene_Karrotten == 11) {
+            Move = 0;
+       }
         int[] Werte0 = {Eigene_Position, Eigene_Salate, Eigene_Karrotten, Karten[0], Karten[1] , Karten[2] ,Karten[3]};
         
         Move move = Alle_Züge.get(Move); // hier wird für die berechnung des Zuges "Move" eingesetzt und dann aus der Liste an möglichen Zügen ausgweählt
@@ -970,8 +979,7 @@ public class Logic implements IGameHandler {
         System.out.println("Karten-Gegner =  " + "Saladfressen: " + GegnerKarten[0] + " | " + "Karotten tauschen: " + GegnerKarten[1] + " | " + "Zurückfallen: " + GegnerKarten[2] + " | " + "Vorrücken: " + GegnerKarten[3] + "\n");
         System.out.println("\u001B[7m\u001B[1;33mBester Zug: " + Zugauswahl +  "\u001B[0m" +"\n");
         System.out.println(Arrays.asList(ZugZuortnung_Name(reichweite(Eigene_Position,  Eigene_Karrotten), Werte0 , "nichts")));
-        System.out.println(gameState.mustEatSalad(gameState.getCurrentPlayer()));
-     
+        System.out.println(gameState.getCurrentPlayer().getCanEnterGoal());
         System.out.println(separator);
         System.out.printf("| %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidthEndwert + "s |\n",
                 "Zug1", "Zug2", "Zug3", "Zug4", "Endwert");
@@ -990,7 +998,7 @@ public class Logic implements IGameHandler {
                     ZugFarbe + String.format("%.2f", alleMöglichkeitenFloatwerte[i][4]) + "\u001B[0m");
         }
         System.out.println(separator);
-
+       
         
         /*---------------------------------------------------------------------------------------------------------*/
         if (gameState.getTurn() >= 60) {
