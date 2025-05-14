@@ -1,0 +1,1085 @@
+package sc.player;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sc.api.plugins.IGameState;
+import sc.plugin2025.Move;
+import sc.plugin2025.Board;
+import sc.plugin2025.Card;
+import sc.plugin2025.Field;
+import sc.plugin2025.GameRuleLogic;
+import sc.plugin2025.GameState;
+import sc.plugin2025.Hare;
+import sc.plugin2025.HuIAction;
+import sc.shared.GameResult;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction;
+
+public class Logic implements IGameHandler {
+    private static final Logger log = LoggerFactory.getLogger(Logic.class);
+
+    private GameState gameState; // AktuellerSpielstatus
+
+    private long totalCalculationTime = 0;
+
+    public static int[] IndexArrFürFeldtyp(Board Board, Field Feld) {
+        int arr[] = new int[64];
+        int x = 0;
+
+        for (int i = 0; i < arr.length; i++) {
+            if (Board.getField(i) == Feld) {
+                arr[x] = i;
+                x++;
+            } else {
+                continue;
+            }
+
+        }
+        int arr1[] = new int[x];
+        for (int i = 0; i < x; i++) {
+            arr1[i] = arr[i];
+        }
+        return arr1;
+    }
+
+    // Gibt die Weiten der Züge in einem Array zurück. Die Züge werden dabei am
+    // Anfang als Liste in die Methode übergeben.
+    public static int[] Zugweite(List<Move> Listmoves, GameState game) {
+        int arr[] = new int[Listmoves.size()];
+        int i = 0;
+        for (Move move : Listmoves) {
+            GameState clone = game.clone();
+            clone.performMoveDirectly(move);
+            arr[i] = clone.getOtherPlayer().getPosition() - game.getCurrentPlayer().getPosition();
+            i++;
+        }
+        return arr;
+    }
+
+    public int[] Karten(List<Card> PlayerCards) {
+        int[] Karten_Typ = new int[4];
+        for (Object karte : PlayerCards) {
+            switch (karte.toString()) {
+                case "EAT_SALAD" -> Karten_Typ[0]++;
+                case "SWAP_CARROTS" -> Karten_Typ[1]++;
+                case "HURRY_AHEAD" -> Karten_Typ[2]++;
+                case "FALL_BACK" -> Karten_Typ[3]++;
+            }
+        }
+        return Karten_Typ;
+    }
+    
+
+    public boolean[] Condition(int Eigene_Position, int Eigene_Salate, int Eigene_Karrotten, int EAT_SALAD, int SWAP_CARROTS, int HURRY_AHEAD , int FALL_BACK, int Feld_int) {
+
+        int Gegner_Position = gameState.getOtherPlayer().getPosition();
+        int Feld = Feld_int + Eigene_Position;
+        int Pre_Goal = 63;
+        if(Gegner_Position == 63) {
+        	Pre_Goal = 61;
+        }
+        
+        
+        Field FeldTyp = gameState.getBoard().getField(Eigene_Position);
+
+        boolean[] Condition = new boolean[17];
+        Condition[0]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && Eigene_Salate != 0&& gameState.getBoard().getField(Feld) == Field.MARKET;
+        Condition[1]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && SWAP_CARROTS == 0&& gameState.getBoard().getField(Feld) == Field.MARKET;
+        Condition[2]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && HURRY_AHEAD == 0&& gameState.getBoard().getField(Feld) == Field.MARKET;
+        Condition[3]  =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) >= 10 && Gegner_Position != Feld && FALL_BACK > 0&& gameState.getBoard().getField(Feld) == Field.MARKET;
+        Condition[4]  =  Eigene_Position != Feld && Eigene_Salate != 0 && Gegner_Position != Feld&& gameState.getBoard().getField(Feld) == Field.SALAD;
+        Condition[5]  =  Gegner_Position != Feld && FeldTyp == Field.SALAD && Eigene_Salate != 0;
+        Condition[6]  =  Eigene_Position != Feld && Eigene_Salate != 0 && EAT_SALAD != 0 && Gegner_Position != Feld&& gameState.getBoard().getField(Feld) == Field.HARE;
+        Condition[7]  =  Eigene_Position != Feld && SWAP_CARROTS != 0 && Feld < 57 && Gegner_Position != Feld&& gameState.getBoard().getField(Feld) == Field.HARE;
+        Condition[8]  =  Eigene_Position != Feld && HURRY_AHEAD != 0 && Eigene_Position < Gegner_Position && Gegner_Position != Feld && gameState.getBoard().getField(Feld) == Field.HARE &&
+        		         (gameState.getBoard().getField(Gegner_Position + 1) != Field.HEDGEHOG || gameState.getBoard().getField(Gegner_Position + 1) == Field.MARKET && Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int) >= 10);
+        Condition[9]  =  Eigene_Position != Feld && FALL_BACK != 0 && Eigene_Position > Gegner_Position && Gegner_Position != Feld&& gameState.getBoard().getField(Feld) == Field.HARE ;
+        Condition[10] =  Eigene_Position != Feld && Gegner_Position != Feld && Eigene_Karrotten <  100 && gameState.getBoard().getField(Feld) == Field.HEDGEHOG ;
+        Condition[11] =  Eigene_Position != Feld && Gegner_Position != Feld && Gegner_Position > Feld&& gameState.getBoard().getField(Feld) == Field.POSITION_2;
+        Condition[12] =  Eigene_Position != Feld && Gegner_Position != Feld && Gegner_Position < Feld&& gameState.getBoard().getField(Feld) == Field.POSITION_1;
+        Condition[13] =  Eigene_Position != Feld && Gegner_Position != Feld && Feld == Pre_Goal && Eigene_Salate == 0 && Condition[16] == false&& gameState.getBoard().getField(Feld) == Field.CARROTS ;
+        Condition[14] =  Eigene_Position == Pre_Goal   && Eigene_Karrotten  > 10 && Eigene_Salate == 0 && Condition[16] == false && gameState.getBoard().getField(Feld) == Field.CARROTS && Eigene_Karrotten  != 0 ;
+        Condition[15] =  Eigene_Position != Feld && Gegner_Position != Feld &&  Feld_int > 3 && Feld != Pre_Goal && Condition[16] == false&& gameState.getBoard().getField(Feld) == Field.CARROTS  ;
+        Condition[16] =  Eigene_Position != Feld && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Feld_int)) <= 10 && Eigene_Salate == 0 && gameState.getBoard().getField(Feld) == Field.GOAL;
+
+        return Condition;
+    }
+   
+    public int[] reichweite(int Eigene_Position, int Eigene_Karrotten) {
+
+        int Eigene_Dist = GameRuleLogic.INSTANCE.calculateMoveableFields(Eigene_Karrotten);
+
+        int[] FelderListe = new int[64];
+        int Felderint = 0;
+        for (int i = 0; i <= Eigene_Dist; i++){
+            if(Eigene_Position + i < 65 && gameState.getBoard().getField(Eigene_Position + i) != null && gameState.getBoard().getField(Eigene_Position + i) != Field.HEDGEHOG ){ // Added bounds check and corrected logic
+                FelderListe[Felderint] = i;
+                Felderint++;
+            }
+            else {
+                continue;
+            }
+        }
+       if (gameState.getBoard().getPreviousField(Field.HEDGEHOG, Eigene_Position) != null ) {
+	    	FelderListe[Felderint] = gameState.getBoard().getPreviousField(Field.HEDGEHOG, Eigene_Position) - Eigene_Position;
+	    	Felderint++;
+	        }
+
+        int[] Mögliche_Züge = new int[Felderint];
+        for (int i = 0; i < Felderint; i++) {
+            Mögliche_Züge[i] = FelderListe[i] ;
+        }
+        
+        return Mögliche_Züge;
+    }
+
+
+	public String[] ZugZuortnung_Name(int[] reichweite, int[] Werte , String Vorheriger_Zug){;
+		int Eigene_Position =  Werte[0];
+		   
+		String[] P_ZugZuortnung = new String[64];
+		int ZugZuortnung_int = 0;
+		for (int i = 0; i < reichweite.length; i++) {
+			Field Feld = gameState.getBoard().getField(reichweite[i] + Eigene_Position);
+		    boolean[] Condition = Condition(Werte[0], Werte[1], Werte[2], Werte[3], Werte[4], Werte[5], Werte[6], reichweite[i]);
+		   
+            switch(Feld) {
+                case MARKET:{
+                    if(Condition[0] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "MARKET EAT_SALAD";
+                    }
+                    if(Condition[1] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "MARKET SWAP_CARROTS";
+                    }
+                    if(Condition[2] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "MARKET HURRY_AHEAD";
+                    }
+                    if(Condition[3] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "MARKET FALL_BACK";
+                    }
+                    break;    
+                }
+                case SALAD:{
+                    if(Condition[4] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "SALAD";
+                    }
+                    if(Condition[5] == true && Vorheriger_Zug != "EAT SALAD" &&  Vorheriger_Zug != "nichts" ||
+                    Vorheriger_Zug == "nichts" && gameState.mustEatSalad(gameState.getCurrentPlayer()) == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "EAT SALAD";
+                    }
+                    break;
+                }
+                case HARE:{
+                    if(Condition[6] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "HARE EAT_SALAD";
+                    }
+                    if(Condition[7] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "HARE SWAP_CARROTS";
+                    }
+                    if(Condition[8] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "HARE HURRY_AHEAD";
+                    }
+                    if(Condition[9] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "HARE FALL_BACK";
+                    }
+                    break;
+                }
+                case HEDGEHOG:{
+                    if(Condition[10] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "HEDGEHOG";
+                    }
+                    break;
+                }
+                case POSITION_2:{
+                    if(Condition[11] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "POSITION_2";
+                    }
+                    break;
+                }
+                case POSITION_1:{
+                    if(Condition[12] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "POSITION_1";
+                    }
+                    break;
+                }
+                case CARROTS:{
+                    if(Condition[13] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "PRE GOAL";
+                    }
+                    if(Condition[14] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "LOSS CARROTS";
+                    }
+                    if(Condition[15] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "CARROT";
+                    }
+                    break;
+                }
+                case GOAL:{
+                    if(Condition[16] == true) {
+                        P_ZugZuortnung[ZugZuortnung_int++]   = "GOAL";
+                    }
+                    break;
+                
+                }
+                default:
+                    break;
+		    }
+            if(Vorheriger_Zug == "SALAD" || Condition[5] == true && Vorheriger_Zug != "EAT SALAD" && Vorheriger_Zug != "nichts" || 
+                	Vorheriger_Zug == "nichts" && gameState.mustEatSalad(gameState.getCurrentPlayer()) == true) {
+        	  ZugZuortnung_int = 1;
+			  P_ZugZuortnung[0] = "EAT SALAD";
+			  break;
+				  
+  		  } 
+            if(Condition[16] == true) {
+  			  ZugZuortnung_int = 1;
+  			  P_ZugZuortnung[0] = "GOAL";
+  			  break;
+  		  } 
+            if(Condition[14] == true && Condition[15] != true) {
+  			  ZugZuortnung_int = 1;
+  			  P_ZugZuortnung[0] = "LOSS CARROTS";
+  			  break;
+  		  } 
+           
+		}
+	
+		
+		String[] ZugZuortnung = null;
+        if(ZugZuortnung_int == 0) {
+           ZugZuortnung = new String[1];
+        	ZugZuortnung[0] = "nichts";
+        } 
+        else {
+        ZugZuortnung = new String[ZugZuortnung_int < 12 ? ZugZuortnung_int : 12];
+        for (int i = 0 , j = 0; i < ZugZuortnung_int &&  i < 12; i++, j++) { 
+                ZugZuortnung[i] = P_ZugZuortnung[j];
+            }
+         
+        }
+		   return ZugZuortnung;
+	   }
+	public int[] ZugZuortnung_int(int[] reichweite, int[] Werte, String Vorheriger_Zug ){
+
+        int Eigene_Position =  Werte[0];
+        int Felder_int = 0;
+        int Gegner_Position = gameState.getOtherPlayer().getPosition();
+        
+
+        int[] P_ZugZuortnung = new int[64];
+        int ZugZuortnung_int = 0;
+
+        for (int i = 0; i < reichweite.length; i++) {
+
+            Field Feld = gameState.getBoard().getField(reichweite[i] + Eigene_Position);
+            boolean[] Condition = Condition(Werte[0], Werte[1], Werte[2], Werte[3], Werte[4], Werte[5], Werte[6], reichweite[i]);
+              switch(Feld) {
+
+              case MARKET:{
+            	  if(Condition[0] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  if(Condition[1] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  if(Condition[2] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  if(Condition[3] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  break;
+              }
+              case SALAD:{
+                  if(Condition[4] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  if(Condition[5] == true && Vorheriger_Zug != "EAT SALAD" &&  Vorheriger_Zug != "nichts" ||
+                    Vorheriger_Zug == "nichts" && gameState.mustEatSalad(gameState.getCurrentPlayer()) == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  break;
+              }
+              case HARE:{
+                  if(Condition[6] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  if(Condition[7] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  if(Condition[8] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = (Gegner_Position-Eigene_Position) + 1;
+                  }
+                  if(Condition[9] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  break;
+              }
+              case HEDGEHOG:{
+                  if(Condition[10] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  break;
+              }
+              case POSITION_2:{
+                  if(Condition[11] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  break;
+              }
+              case POSITION_1:{
+                  if(Condition[12] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  break;
+              }
+              case CARROTS:{
+            	  if(Condition[13] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];;
+                  }
+                  if(Condition[14] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];;
+                  }
+                  if(Condition[15] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];;
+                  }
+                  break;
+              }
+              case GOAL:{
+                  if(Condition[16] == true) {
+                      P_ZugZuortnung[ZugZuortnung_int++]   = reichweite[i];
+                  }
+                  break;
+              }
+              default:
+                  break;
+            }
+              if(Vorheriger_Zug == "SALAD" || Condition[5] == true && Vorheriger_Zug != "EAT SALAD" && Vorheriger_Zug != "nichts" || 
+            	Vorheriger_Zug == "nichts" && gameState.mustEatSalad(gameState.getCurrentPlayer()) == true) {
+    			  ZugZuortnung_int = 1;
+    			  P_ZugZuortnung[0] = 0;
+    			  break;
+    		  } 
+              if(Condition[16] == true) { 
+    			  ZugZuortnung_int = 1;
+    			  P_ZugZuortnung[0] = reichweite[i];
+    			  break;
+    		  } 
+              if(Condition[14] == true) {
+    			  ZugZuortnung_int = 1;
+    			  P_ZugZuortnung[0] = reichweite[i];
+    			  break;
+    		  } 
+
+    		  
+          }
+        int[] ZugZuortnung = null;
+        if(ZugZuortnung_int == 0) {
+           ZugZuortnung = new int[1];
+        	ZugZuortnung[0] = 0;
+        } 
+        else {
+        ZugZuortnung = new int[ZugZuortnung_int < 12 ? ZugZuortnung_int : 12];
+        for (int i = 0 , j = 0; i < ZugZuortnung_int && i < 12; i++, j++) { 
+                ZugZuortnung[i] = P_ZugZuortnung[j];
+            }
+         
+        }
+           return ZugZuortnung;
+       }
+
+
+    public String[] Schleife = {"MARKET EAT_SALAD", "MARKET SWAP_CARROTS", "MARKET HURRY_AHEAD", "MARKET FALL_BACK", "SALAD", "EAT SALAD", "HARE EAT_SALAD ",
+                                "HARE SWAP_CARROTS", "HARE HURRY_AHEAD", "HARE FALL_BACK", "HEDGEHOG", "POSITION_2", "POSITION_1", "CARROTS", "GOAL"};
+
+    public int[] Werteveränderung(int[] Werte , String Zug, int Zug_int ){
+        
+        int Eigene_Position = Werte[0];
+        int Eigene_Salate = Werte[1];
+        int Eigene_Karrotten = Werte[2];
+        int SWAP_CARROTS = Werte[4];
+        int EAT_SALAD = Werte[3];
+        int HURRY_AHEAD = Werte[5];
+        int FALL_BACK = Werte[6];
+        int Gegner_Position = gameState.getOtherPlayer().getPosition();
+        int Gengner_Karroten = gameState.getOtherPlayer().getCarrots();
+        int[] GegnerKarten  = Karten(gameState.getOtherPlayer().getCards());
+       
+
+        switch(Zug)  {
+
+            case "MARKET EAT_SALAD": {
+                Eigene_Position = Eigene_Position + Zug_int; // Fixed: Using Zug_int instead of Dist_Feld
+                EAT_SALAD ++;
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int) - 10; // Fixed: Using Zug_int
+                break; // Added break to prevent fall-through
+            }
+            case "MARKET SWAP_CARROTS": {
+                Eigene_Position = Eigene_Position + Zug_int; // Fixed: Using Zug_int
+                SWAP_CARROTS ++;
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int) - 10 ; // Fixed: Using Zug_int
+                break; // Added break
+            }
+            case "MARKET HURRY_AHEAD": {
+                Eigene_Position = Eigene_Position + Zug_int; // Fixed: Using Zug_int
+                HURRY_AHEAD ++;
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int) - 10 ; // Fixed: Using Zug_int
+                break; // Added break
+            }
+            case "MARKET FALL_BACK": {
+                Eigene_Position = Eigene_Position + Zug_int; // Fixed: Using Zug_int
+                FALL_BACK ++;
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int) - 10; // Fixed: Using Zug_int
+                break; // Added break
+            }
+            case "SALAD": {
+                Eigene_Position = Eigene_Position + Zug_int;
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int);
+                break;
+            }
+
+            case "EAT SALAD": {
+                Eigene_Salate --;
+                if(Eigene_Position < Gegner_Position){
+                    Eigene_Karrotten = Eigene_Karrotten +30;
+                }
+                if(Eigene_Position > Gegner_Position){
+                    Eigene_Karrotten = Eigene_Karrotten +10;
+                }
+                break;
+            }
+            case "HARE EAT_SALAD": {
+                Eigene_Position = Eigene_Position + Zug_int;
+                Eigene_Salate --;
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int);
+                EAT_SALAD --;
+
+                if(Eigene_Position < Gegner_Position){
+                    Eigene_Karrotten = Eigene_Karrotten +30;
+                }
+                if(Eigene_Position > Gegner_Position){
+                    Eigene_Karrotten = Eigene_Karrotten +10;
+                }
+                break;
+            }
+            case "HARE SWAP_CARROTS": {
+                Eigene_Position = Eigene_Position + Zug_int;
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int);
+                SWAP_CARROTS --;
+                int temp = Eigene_Karrotten;
+                Eigene_Karrotten = Gengner_Karroten;
+                Gengner_Karroten = temp;
+                break;
+            }
+            case "HARE HURRY_AHEAD": {
+                Eigene_Position =  Gegner_Position + 1;
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int);
+                HURRY_AHEAD--;
+                break;
+            }
+            case "HARE FALL_BACK": {
+                Eigene_Position =  Gegner_Position - 1;
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int) ;
+                FALL_BACK--;
+                break;
+            }
+            case "HEDGEHOG": {
+                Eigene_Position = Eigene_Position + Zug_int;
+                Eigene_Karrotten = Eigene_Karrotten + ( -10 * Zug_int);
+                break;
+            }
+            case "POSITION_2": {
+                Eigene_Position = Eigene_Position + Zug_int;
+                if(Eigene_Position < Gegner_Position){
+                    Eigene_Karrotten = Eigene_Karrotten + 30;
+                }
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int);
+                break;
+            }
+            case "POSITION_1": {
+                Eigene_Position = Eigene_Position + Zug_int;
+                if(Eigene_Position > Gegner_Position){
+                    Eigene_Karrotten = Eigene_Karrotten + 10;
+                }
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int);
+                break;
+            }
+            case "PRE GOAL": {
+                Eigene_Position = Eigene_Position + Zug_int;
+                Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int);
+                break;
+            }
+            case "LOSS CARROTS": {
+                Eigene_Karrotten = Eigene_Karrotten - 10;
+                break;
+            }
+            case "CARROT": {
+            	Eigene_Position = Eigene_Position + Zug_int;
+            	Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int);
+                break;
+            }
+            case "GOAL": {
+                if (Eigene_Karrotten <= 10 && Eigene_Salate == 0) {
+                    Eigene_Position = 64;
+                    Eigene_Karrotten = Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(Zug_int);
+                }
+                break;
+            }
+        }
+
+        int[] Werteveränderung =  new int[7];
+        Werteveränderung[0] = Eigene_Position;
+        Werteveränderung[1] = Eigene_Salate;
+        Werteveränderung[2] = Eigene_Karrotten;
+        Werteveränderung[3] = EAT_SALAD;
+        Werteveränderung[4] = SWAP_CARROTS;
+        Werteveränderung[5] = HURRY_AHEAD;
+        Werteveränderung[6] = FALL_BACK;
+        
+        return Werteveränderung;
+    }
+
+
+    public String[][][] ZugMöglichkeiten(int MengeAnWiederholungen){
+    	
+    	
+        int Eigene_Karrotten = gameState.getCurrentPlayer().getCarrots();
+        int Gengner_Karroten = gameState.getOtherPlayer().getCarrots();
+        int Eigene_Salate = gameState.getCurrentPlayer().getSalads();
+        int Gegner_Position = gameState.getOtherPlayer().getPosition();
+        int Eigene_Position = gameState.getCurrentPlayer().getPosition();
+        int Dist_Feld = 0; // Unused variable, can be removed
+        int[] Karten  = Karten(gameState.getCurrentPlayer().getCards());
+        int[] GegnerKarten  = Karten(gameState.getOtherPlayer().getCards());
+        int[] Werte0 = {Eigene_Position, Eigene_Salate, Eigene_Karrotten, Karten[0], Karten[1] , Karten[2] ,Karten[3]};
+        String[]  Mögliche_Züge = ZugZuortnung_Name(reichweite(Eigene_Position, Eigene_Karrotten), Werte0, "nichts");
+    	int[] Mögliche_Züge_int = ZugZuortnung_int(reichweite(Eigene_Position, Eigene_Karrotten), Werte0 , "nichts");
+        String[][][] Platzhalter2 = new String[100000][MengeAnWiederholungen][2];
+        String[] EAT_SALAT = {"EAT SALAD"};
+        String[] Mögliche_Züge2 = {"nichts"};
+        String[] Mögliche_Züge1 = {"nichts"};
+        String[] Mögliche_Züge3 = {"nichts"};
+        int e = 0;
+        
+        for(int i = 0 ; i < Mögliche_Züge.length ; i++){
+            int[] Werte = Werteveränderung(Werte0, Mögliche_Züge[i],  Mögliche_Züge_int[i]); 
+            int[] Mögliche_Züge1_int = ZugZuortnung_int(reichweite(Werte[0], Werte[2]), Werte,  Mögliche_Züge[i]);
+            if (Mögliche_Züge[i] == "SALAD") {
+            Mögliche_Züge1	= EAT_SALAT; 
+            }
+            else {
+            Mögliche_Züge1 = ZugZuortnung_Name(reichweite(Werte[0], Werte[2]), Werte, Mögliche_Züge[i]);
+            }
+            for (int f = 0; f <  Mögliche_Züge1.length; f++) {
+
+                int[] Werte1 = Werteveränderung(Werte, Mögliche_Züge1[f], Mögliche_Züge1_int[f]); 
+                int[] Mögliche_Züge2_int = ZugZuortnung_int(reichweite(Werte1[0], Werte1[2]), Werte1,  Mögliche_Züge1[f]);
+                if (Mögliche_Züge1[f] == "SALAD") {
+                    Mögliche_Züge2	= EAT_SALAT; 
+                    }
+                else if (Mögliche_Züge1[f] != "SALAD") {
+                    Mögliche_Züge2 = ZugZuortnung_Name(reichweite(Werte1[0], Werte1[2]), Werte1, Mögliche_Züge1[f]);
+                    }
+                for (int b = 0; b < Mögliche_Züge2.length; b ++) {
+
+                    int[] Werte2 = Werteveränderung(Werte1, Mögliche_Züge2[b], Mögliche_Züge2_int[b]); 
+                    int[] Mögliche_Züge3_int = ZugZuortnung_int(reichweite(Werte2[0], Werte2[2]), Werte2, Mögliche_Züge2[b]);
+                    if (Mögliche_Züge2[b] == "SALAD") {
+                        Mögliche_Züge3	= EAT_SALAT; 
+                        }
+                    else if (Mögliche_Züge2[b] != "SALAD") {
+                        Mögliche_Züge3 = ZugZuortnung_Name(reichweite(Werte2[0], Werte2[2]), Werte2, Mögliche_Züge2[b]);
+                        }
+                    for (int h = 0; h < Mögliche_Züge3.length; h ++ ,e++) {
+                    	
+                        Platzhalter2 [e][0][0] =  Mögliche_Züge[i];
+                        Platzhalter2 [e][1][0] = Mögliche_Züge1[f];
+                        Platzhalter2 [e][2][0] = Mögliche_Züge2[b];
+                        Platzhalter2 [e][3][0] = Mögliche_Züge3[h];
+                        Platzhalter2 [e][0][1] = Integer.toString(Mögliche_Züge_int[i]);
+                        Platzhalter2 [e][1][1] = Integer.toString(Mögliche_Züge1_int[f]);
+                        Platzhalter2 [e][2][1] = Integer.toString(Mögliche_Züge2_int[b]);
+                        Platzhalter2 [e][3][1] = Integer.toString(Mögliche_Züge3_int[h]);
+                    }
+                    }
+                }
+            }
+
+        String[][][] Alle_Möglichkeiten = new String [e][4][2];
+        for (int i = 0; i < e; i++){
+            for (int j = 0; j < 4; j++){
+            	 for (int y = 0; y < 2; y++){
+                Alle_Möglichkeiten [i][j][y] = Platzhalter2 [i][j][y];
+            }
+        }
+       }
+        return Alle_Möglichkeiten;
+
+    }
+
+ public float[] Floatwerte_Anpassung ( float[] Floatwerte, String Züge[] , int[] Züge_int){
+    	
+    	int Eigene_Karrotten = gameState.getCurrentPlayer().getCarrots();
+        int Eigene_Salate = gameState.getCurrentPlayer().getSalads();
+        int Eigene_Position = gameState.getCurrentPlayer().getPosition();
+        int[] Karten  = Karten(gameState.getCurrentPlayer().getCards());
+
+        int[] Werte0 = {Eigene_Position,  Eigene_Salate,  Eigene_Karrotten, Karten[0], Karten[1],Karten[2], Karten[3]};
+    	
+         boolean Terminate = false;
+		 int[] Werte = Werteveränderung(Werte0, Züge[0],  Züge_int[0]);
+		 int[] Werte1 = Werteveränderung(Werte, Züge[1],  Züge_int[1]); 
+		 int[] Werte2 = Werteveränderung(Werte1, Züge[2],  Züge_int[2]); 
+		 int[] Werte3 = Werteveränderung(Werte2, Züge[3],  Züge_int[3]); 
+		 int[][] Werte_ings = {Werte0, Werte, Werte1, Werte2, Werte3};
+		 
+    	
+    	for(int i = 0; i < Floatwerte.length - 1  && Terminate != true; i++) {
+    		
+    		
+    		int[] AktuelleWerte  = Werte_ings[i + 1];
+    		int[] VorherigeWerte  = Werte_ings[i];
+    		int Gegner_Position = gameState.getOtherPlayer().getPosition();
+	        int Gegner_Karrotten = gameState.getOtherPlayer().getCarrots();
+	        int Gegangende_Dist =  AktuelleWerte[0] - VorherigeWerte[0];
+	 	    int KarrottenZähler = AktuelleWerte[2] - VorherigeWerte[2];
+	 	    int SWAP_CARROTSZähler = AktuelleWerte[3] - VorherigeWerte[3];
+	 	    int EAT_SALADZähler = AktuelleWerte[4] - VorherigeWerte[4];
+	 	    float Floatwert = Floatwerte[i];
+    		
+    		switch(Züge[i]) {
+    		
+		 	  case "MARKET EAT_SALAD" :{ 
+		 		  if(i == 0) {
+		 		 int n =  AktuelleWerte[1];  // Salate 
+		 		  int p =  AktuelleWerte[3];  // EAT_SALAD
+		 		  
+		 		 Floatwert = (2 * Floatwert * ((n + 1)))/(p + 1)/2; 
+		 		  }
+		 	  }
+		      break;
+		      case "MARKET SWAP_CARROTS":{
+		    	 
+		 	  }
+		      break;
+		      case "MARKET HURRY_AHEAD":{  
+		    	  
+		 	  }
+		      break;
+		      case "MARKET FALL_BACK":{
+		    	  
+		      }
+		      break;
+		      case "SALAD":{
+		    	  if(i == 0) {
+		    	  int n =  AktuelleWerte[1];  // Salate 
+		 		 
+		 		  
+		 		 Floatwert = (float) (Floatwert * Math.log((2*n + 1)*5)); 
+		    	  }
+		      }
+		      break;
+		      case "EAT SALAD":{
+		    	  
+		      }
+		      break;
+		      case "HARE EAT_SALAD":{
+		    	  if(i == 0) {
+		    	  int n =  AktuelleWerte[1];  // Salate 
+		 		  int p =  AktuelleWerte[3];  // EAT_SALAD
+		 		  
+		 		 Floatwert = (float) (Floatwert * Math.log((n + p + 1)*5)); 
+		    	  }
+		      }
+		      break;
+		      case "HARE SWAP_CARROTS":{
+		    	 
+
+		 	  }
+		      break;
+		      case "HARE HURRY_AHEAD":{
+		    	  
+		    	  
+		 	  }
+		      break;
+		      case "HARE FALL_BACK":{
+		      }
+		      break;
+		      case "HEDGEHOG":{
+		    	
+		      }
+		      break;
+		      case "POSITION_2":{
+		 
+		      break;
+		      }
+		      case "POSITION_1":{
+	
+		      break;
+		      }
+		      case "CARROT" :{
+		    	 
+		      break;
+		      }
+		      case"PRE GOAL":{
+                     if(i == 0 && AktuelleWerte[2] <= 1) {
+		    		  
+		    		  Floatwerte[0] = 0.0f;
+		    		  Floatwerte[1] = 0.0f;
+		    		  Floatwerte[2] = 0.0f;
+		    		  Floatwerte[3] = 0.0f;
+		    		  Terminate = true;
+		    	  } 
+		      }
+             case"GOAL":{
+                 Floatwert = Floatwert + 2/(AktuelleWerte[2]+1);
+		      break;
+		      }
+    		}
+    		Floatwerte[i] = Floatwert;
+    		
+    	}
+        return Floatwerte; 
+    }
+
+    public float[][] Floatwerte( String[][] Züge , int[][] Züge_int) {
+        int Eigene_Karrotten = gameState.getCurrentPlayer().getCarrots();
+        int Eigene_Salate = gameState.getCurrentPlayer().getSalads();
+        int Eigene_Position = gameState.getCurrentPlayer().getPosition();
+        int[] Karten  = Karten(gameState.getCurrentPlayer().getCards());
+
+        int[] Werte0 = {Eigene_Position,  Eigene_Salate,  Eigene_Karrotten, Karten[0], Karten[1],Karten[2], Karten[3]};
+
+        float[][]Floatwerte = new float[Züge.length][5];
+        float Floatwert = 0.0f;
+        String Zug = "nichts";
+
+
+        for (int i = 0; i < Züge.length; i++){
+            for (int j = 0; j < Züge[i].length ; j++){
+                Zug = Züge [i][j];
+                switch(Zug)  {
+                
+                    case "MARKET EAT_SALAD": Floatwert =  0.4f;
+                    break;
+                    case "MARKET SWAP_CARROTS":Floatwert =  0.0f;
+                    break;
+                    case "MARKET HURRY_AHEAD":Floatwert =  0.0f;
+                    break;
+                    case "MARKET FALL_BACK":Floatwert =  0.0f;
+                    break;
+                    case "SALAD":Floatwert =  	0.1f;
+                    break;
+                    case "EAT SALAD":Floatwert =  0.0f;
+                    break;
+                    case "HARE EAT_SALAD":Floatwert =  1.0f;
+                    break;
+                    case "HARE SWAP_CARROTS":Floatwert =  0.0f;
+                    break;
+                    case "HARE HURRY_AHEAD":Floatwert =  0.0f;
+                    break;
+                    case "HARE FALL_BACK":Floatwert =  0.0f;
+                    break;
+                    case "HEDGEHOG":Floatwert =  0.0f;
+                    break;
+                    case "POSITION_2":Floatwert =  0.2f;
+                    break;
+                    case "POSITION_1":Floatwert =  0.2f;
+                    break;
+                    case "PRE GOAL":Floatwert =  0.8f;
+                    break;
+                    case "LOSS CARROTS":Floatwert =  0.5f;
+                    break;
+                    case "CARROT":Floatwert =  0.1f;
+                    break;
+                    case "GOAL":Floatwert =  5.0f;
+                    break;
+                    case "nichts":Floatwert =  0.0f;
+                    break;
+                }
+                Floatwerte [i][j] = Floatwert;   
+            }
+            float[] Floatwerte_A  = {Floatwerte [i][0],Floatwerte [i][1],Floatwerte [i][2],Floatwerte [i][3], Floatwerte [i][4]};
+            int[] Züge_int_A = {Züge_int [i][0],Züge_int [i][1],Züge_int [i][2],Züge_int [i][3]};
+            String[] Züge_A = {Züge [i][0],Züge [i][1],Züge [i][2],Züge [i][3]};
+            
+            	Floatwerte [i] = Floatwerte_Anpassung( Floatwerte_A, Züge_A, Züge_int_A);
+            Floatwerte [i][4] = Floatwerte [i][0]/1 + Floatwerte [i][1]/2 + Floatwerte [i][2]/3 + Floatwerte [i][3]/4;
+        }
+
+
+        return  Floatwerte;
+    }
+
+    public int Zugauswahl(float[][]Float, int[][] Züge ) {
+
+        int[] ZugList = new int[Züge.length];
+        
+        for(int i = 0; i < Float.length; i++) {
+        	ZugList[i] = Züge[i][0];
+        }
+        
+        float[] Endwert = new float[Float.length];
+        for(int i = 0; i < Float.length; i++) {
+            Endwert[i] = Float[i][4];
+        }
+       
+        int Zug = 0;
+        float maxValue = 0.0f; // Startwert setzen
+
+        for (int i = 0; i < Endwert.length; i++) {
+            if (Endwert[i] > maxValue) {
+                maxValue = Endwert[i];
+                Zug = ZugList[i];
+            }
+        }
+        return Zug;
+    }
+    public float Endwert(float[][] Float ) {
+    	
+    	float[] Endwert = new float[Float.length];
+        for(int i = 0; i < Float.length; i++) {
+            Endwert[i] = Float[i][4];
+        }
+        float maxValue = 0.0f; // Startwert setzen
+
+        for (int i = 0; i < Endwert.length; i++) {
+            if (Endwert[i] > maxValue) {
+                maxValue = Endwert[i];
+            }
+        }
+        return maxValue;
+    }
+    public String Zugauswahl(float[][] Float, String[][] Züge ) {
+
+        float[] Endwert = new float[Float.length];
+        for(int i = 0; i < Float.length; i++) {
+            Endwert[i] = Float[i][4];
+        }
+
+        String[] ZugList = new  String[Float.length];
+        for(int i = 0; i < Float.length; i++) {
+            ZugList[i] = Züge[i][0];
+        }
+        String Zug = "nichts";
+        float maxValue = 0.0f; // Startwert setzen
+
+        for (int i = 0; i < Endwert.length; i++) {
+            if (Endwert[i] > maxValue) {
+                maxValue = Endwert[i];
+                Zug = ZugList[i];
+            }
+        }
+        return Zug;
+    }
+
+
+
+    public Move calculateMove() {
+
+        long startTime = System.currentTimeMillis(); // zum messen der Zeit
+
+        log.info("Es wurde ein Zug von {} angefordert.", gameState.getCurrentTeam());
+
+        int Eigene_Karrotten = gameState.getCurrentPlayer().getCarrots();
+        int Gengner_Karroten = gameState.getOtherPlayer().getCarrots();
+        int Eigene_Salate = gameState.getCurrentPlayer().getSalads();
+        int Gegner_Position = gameState.getOtherPlayer().getPosition();
+        int Eigene_Position = gameState.getCurrentPlayer().getPosition();
+        Field Eigne_FeldTyp = gameState.getBoard().getField(gameState.getCurrentPlayer().getPosition());
+        Field Gegner_FeldTyp = gameState.getBoard().getField(gameState.getOtherPlayer().getPosition());
+        String Gespielte_Schleife = "nichts";
+        int[] Karten  = Karten(gameState.getCurrentPlayer().getCards());
+        int[] GegnerKarten  = Karten(gameState.getOtherPlayer().getCards());
+        List < Move > Alle_Züge = gameState.getSensibleMoves();
+        int Move = 0;
+        int Anzahl_Mögliche_Züge = Alle_Züge.size();
+        gameState.getCurrentPlayer().getLastAction();
+        int[] Zugweite = Zugweite(Alle_Züge, gameState);
+        gameState.canPlayAnyCard(gameState.getCurrentPlayer());
+        
+        int KartenZahl = 0;
+        int KartenZahl_1 = 0;
+        int KartenZahl_2 = 0;
+        int KartenZahl_3 = 0;
+
+          if (Karten[0] != 0 && Eigene_Salate != 0) {
+            KartenZahl++;
+          }
+          if (Karten[1] != 0 && Gegner_Position < 57 && Eigene_Position < 57) {
+            KartenZahl_1++;
+          }
+          if (Karten[2] != 0 && Eigene_Position < Gegner_Position &&  gameState.getBoard().getField(Gegner_Position + 1) != Field.HEDGEHOG) {
+            KartenZahl_2++;
+          }
+          if (Karten[3] != 0 && Eigene_Position > Gegner_Position) {
+            KartenZahl_3++;
+          }
+ 
+        
+        String[][][] Platzhaltzer = ZugMöglichkeiten(5);
+        String[][] alleMöglichkeiten = new String[Platzhaltzer.length][4];
+        for (int e = 0; e < Platzhaltzer.length; e++){
+            for (int j = 0; j < 4 ; j++){
+            	alleMöglichkeiten [e][j] =Platzhaltzer[e][j][0];
+             
+                }
+            }
+        String[][] alleMöglichkeiten_intString  = new String[Platzhaltzer.length][4];
+        int[][] alleMöglichkeiten_int  = new int[Platzhaltzer.length][4];
+        for (int e = 0; e < Platzhaltzer.length; e++){
+            for (int j = 0; j < 4 ; j++){
+            	alleMöglichkeiten_intString [e][j] =Platzhaltzer[e][j][1];
+            	alleMöglichkeiten_int[e][j] =  Integer. parseInt(Platzhaltzer[e][j][1]);
+             
+                }
+            }
+
+        float[][] alleMöglichkeitenFloatwerte = Floatwerte(alleMöglichkeiten,alleMöglichkeiten_int ); 
+        int zugwahl = Zugauswahl(alleMöglichkeitenFloatwerte, alleMöglichkeiten_int ); 
+        String Zugauswahl  = Zugauswahl(alleMöglichkeitenFloatwerte, alleMöglichkeiten);
+        float endwert = Endwert(alleMöglichkeitenFloatwerte); 
+        switch (Zugauswahl) {
+        
+        case "MARKET EAT_SALAD", "MARKET SWAP_CARROTS", "MARKET HURRY_AHEAD", "MARKET FALL_BACK", "SALAD", "EAT SALAD", "HARE EAT_SALAD",
+              "HARE SWAP_CARROTS", "HARE HURRY_AHEAD", "HARE FALL_BACK", "HEDGEHOG", "POSITION_2", "POSITION_1", "PRE GOAL", "GOAL" , "CARROT" ,"LOSS CARROTS": {
+        	int Zugindex = 0;
+        	for (int i = 0; i < Zugweite.length; i++) {
+         	   if (Zugweite[i] ==  zugwahl) {
+                    Zugindex = i;
+                    break;
+         	   }
+              } 
+          int Modifikation = 0; 
+          switch (Zugauswahl) { 
+          case "MARKET EAT_SALAD" : Modifikation = 0;
+          break;
+          case "MARKET SWAP_CARROTS" : Modifikation = 1;
+          break;
+          case "MARKET HURRY_AHEAD" : Modifikation = 3;
+          break;
+          case "MARKET FALL_BACK" : Modifikation = 2;
+          break;
+          case "HARE EAT_SALAD" : Modifikation = KartenZahl_3 + KartenZahl_1;
+          break;
+          case "HARE SWAP_CARROTS" : Modifikation = KartenZahl_3 +KartenZahl_2;
+          break;
+          case "HARE HURRY_AHEAD" : Modifikation = KartenZahl_3;
+          break;
+          case "HARE FALL_BACK" : Modifikation = 0;
+          break;
+          case "LOSS CARROTS" : Modifikation = 1 ;
+          break;
+          }
+          Move = Zugindex + Modifikation;
+         }
+        }
+        
+        if ( Eigene_Position != 64 && (Eigene_Karrotten - GameRuleLogic.INSTANCE.calculateCarrots(64 - Eigene_Position)) <= 10 && Eigene_Salate == 0 
+        	&&  GameRuleLogic.INSTANCE.calculateMoveableFields(Eigene_Karrotten) == (64 - Eigene_Position)) {
+            int Zugindex = 0;
+            for (int i = 0; i < Zugweite.length; i++) {
+                 if (Zugweite[i] + Eigene_Position ==  64) {
+                     Zugindex = i;
+                     break;
+                 }
+            }
+            Move = Zugindex;
+        }
+        if (gameState.getCurrentPlayer().getCanEnterGoal() == true) {
+                int Zugindex = 0;
+                for (int i = 0; i < Zugweite.length; i++) {
+                     if (Zugweite[i] + Eigene_Position ==  64) {
+                         Zugindex = i;
+                         break;
+                     }
+                }
+                Move = Zugindex;
+            }
+        if (Eigene_Position == 63 && Eigene_Karrotten == 11) {
+            Move = 0;
+       }
+        int[] Werte0 = {Eigene_Position, Eigene_Salate, Eigene_Karrotten, Karten[0], Karten[1] , Karten[2] ,Karten[3]};
+        
+        Move move = Alle_Züge.get(Move); // hier wird für die berechnung des Zuges "Move" eingesetzt und dann aus der Liste an möglichen Zügen ausgweählt
+
+        // Der folgende Abschnnit dient dazu um in der Konsole zu sehen was durchgeführt wird:
+
+        /*--------------------------------------------------------------------------------------------------------*/
+        log.info("Sende {} nach {}ms.", move, System.currentTimeMillis() - startTime);
+
+        long moveCalculationTime = System.currentTimeMillis() - startTime;
+        totalCalculationTime += moveCalculationTime;
+
+        int columnWidth = 33;
+        int columnWidthEndwert = 8;
+        int columnCount = 5;
+
+        String separator = new String(new char[(columnCount - 1) * (columnWidth + 3) + columnWidthEndwert +4 ]).replace("\0", "_");
+
+        System.out.println("\033[1;36mSpielrunde: " + gameState.getTurn() + "\u001B[0m | Menge an Karrotten: " + Eigene_Karrotten + "\n");
+        System.out.println("Mögliche Züge: (gesammt: " + Anzahl_Mögliche_Züge + ") " + Alle_Züge + "\n");
+        System.out.println(Arrays.toString(Zugweite) + "\n");
+        System.out.println("Gespielter Zug: " + move + " ; " + Move + "\n");
+        System.out.println("Eigendes Feld: " + Eigne_FeldTyp + " auf Position: " + Eigene_Position + "\n");
+        System.out.println("Karten =  " + "Saladfressen: " + Karten[0] + " | " + "Karotten tauschen: " + Karten[1] + " | " + "Zurückfallen: " + Karten[2] + " | " + "Vorrücken: " + Karten[3] + "\n");
+        System.out.println("Karten-Gegner =  " + "Saladfressen: " + GegnerKarten[0] + " | " + "Karotten tauschen: " + GegnerKarten[1] + " | " + "Zurückfallen: " + GegnerKarten[2] + " | " + "Vorrücken: " + GegnerKarten[3] + "\n");
+        System.out.println("\u001B[7m\u001B[1;33mBester Zug: " + Zugauswahl +  "\u001B[0m" +"\n");
+        System.out.println(Arrays.asList(ZugZuortnung_Name(reichweite(Eigene_Position,  Eigene_Karrotten), Werte0 , "nichts")));
+        System.out.println(separator);
+        System.out.printf("| %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidthEndwert + "s |\n",
+                "Zug1", "Zug2", "Zug3", "Zug4", "Endwert");
+        System.out.println(separator);
+        for (int i = 0; i < alleMöglichkeiten.length; i++) {
+            String ZugFarbe = "\u001B[32m";
+            if(alleMöglichkeitenFloatwerte[i][4] != endwert) {
+                ZugFarbe = "\u001B[0m";
+            }
+
+            System.out.printf("| %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidth + "s | %-" + columnWidth + "s | %-"  + columnWidthEndwert + "s |\n",
+                    alleMöglichkeiten[i][0] + " / " + alleMöglichkeiten_intString[i][0] + " : " + String.format("%.2f", alleMöglichkeitenFloatwerte[i][0]),
+                    alleMöglichkeiten[i][1] + " / " + alleMöglichkeiten_intString[i][1] + " : " + String.format("%.2f", alleMöglichkeitenFloatwerte[i][1]/2),
+                    alleMöglichkeiten[i][2] + " / " + alleMöglichkeiten_intString[i][2] + " : " + String.format("%.2f", alleMöglichkeitenFloatwerte[i][2]/3),
+                    alleMöglichkeiten[i][3] + " / " + alleMöglichkeiten_intString[i][3] + " : " + String.format("%.2f", alleMöglichkeitenFloatwerte[i][3]/4),
+                    ZugFarbe + String.format("%.2f", alleMöglichkeitenFloatwerte[i][4]) + "\u001B[0m");
+        }
+        System.out.println(separator);
+        
+        /*---------------------------------------------------------------------------------------------------------*/
+        if (gameState.getTurn() >= 60) {
+            System.out.println("\033[1;35mGesamte Berechnungszeit: " + totalCalculationTime + "ms\033[0m");
+        }
+
+        return move;
+
+    }
+
+    @Override
+
+    public void onUpdate(IGameState gameState) {
+
+        this.gameState = (GameState) gameState;
+        log.info("Zug: {} Dran: {}", gameState.getTurn(), gameState.getCurrentTeam());
+
+    }
+
+    public void onGameOver(GameResult data) { //Wird aufgerufen, wenn das Spiel beendet ist.
+
+        log.info("Das Spiel ist beendet, Ergebnis: {}", data);
+        System.out.println("Das Spiel ist beendet, Ergebnis: " + data);
+        System.out.println("\033[1;35mGesamte Berechnungszeit: " + totalCalculationTime + "ms\033[0m");
+
+    }
+
+    @Override
+
+    public void onError(String error) { //Wird aufgerufen, wenn der Server einen Fehler meldet. Bedeutet auch den Abbruch des Spiels.
+
+        log.warn("Fehler: {}", error);
+
+    }
+
+}
