@@ -1,0 +1,96 @@
+package sc.player;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sc.api.plugins.IGameState;
+import sc.plugin2025.Move;
+import sc.plugin2025.Board;
+import sc.plugin2025.Card;
+import sc.plugin2025.Field;
+import sc.plugin2025.GameState;
+import sc.shared.GameResult;
+
+import java.util.List;
+
+public class Logic2 implements IGameHandler {
+  private static final Logger log = LoggerFactory.getLogger(Logic2.class);
+ 
+
+  private GameState gameState;
+
+  public static int[] IndexArrFürFeldtyp(Board Board, Field Feld) {
+      int arr[] = new int[64];
+      int x = 0;
+
+      for (int i = 0; i < arr.length; i++) {
+          if (Board.getField(i) == Feld) {
+              arr[x] = i;
+              x++;
+          } else {
+              continue;
+          }
+
+      }
+      int arr1[] = new int[x];
+      for (int i = 0; i < x; i++) {
+          arr1[i] = arr[i];
+      }
+      return arr1;
+  }
+  public static int[] Zugweite(List<Move> Listmoves, GameState game) {
+      int arr[] = new int[Listmoves.size()];
+      int i = 0;
+      for (Move move : Listmoves) {
+          GameState clone = game.clone();
+          clone.performMoveDirectly(move);
+          arr[i] = clone.getOtherPlayer().getPosition() - game.getCurrentPlayer().getPosition();
+          i++;
+      }
+      return arr;
+  }
+  public int[] Karten(List<Card> PlayerCards) {
+      int[] Karten_Typ = new int[4];
+      for (Object karte : PlayerCards) {
+          switch (karte.toString()) {
+              case "EAT_SALAD" -> Karten_Typ[0]++;
+              case "SWAP_CARROTS" -> Karten_Typ[1]++;
+              case "HURRY_AHEAD" -> Karten_Typ[2]++;
+              case "FALL_BACK" -> Karten_Typ[3]++;
+          }
+      }
+      return Karten_Typ;
+  }
+ 
+  
+  
+  public Move calculateMove() {
+    long startTime = System.currentTimeMillis();
+    log.info("Es wurde ein Zug von {} angefordert.", gameState.getCurrentTeam());
+
+    List<Move> possibleMoves = gameState.getSensibleMoves();
+    
+    Move move = possibleMoves.get((int) (Math.random() * possibleMoves.size()));
+
+    log.info("Sende {} nach {}ms.", move, System.currentTimeMillis() - startTime);
+    return move;
+  }
+
+  /** Ein neuer Spielstatus ist verfügbar, d.h. ein Zug wurde erfolgreich ausgeführt. */
+  @Override
+  public void onUpdate(IGameState gameState) {
+    this.gameState = (GameState) gameState;
+    log.info("Zug: {} Dran: {}", gameState.getTurn(), gameState.getCurrentTeam());
+  }
+
+  /** Wird aufgerufen, wenn das Spiel beendet ist. */
+  public void onGameOver(GameResult data) {
+    log.info("Das Spiel ist beendet, Ergebnis: {}", data);
+  }
+
+  /** Wird aufgerufen, wenn der Server einen Fehler meldet.
+   * Bedeutet auch den Abbruch des Spiels. */
+  @Override
+  public void onError(String error) {
+    log.warn("Fehler: {}", error);
+  }
+}
