@@ -7,6 +7,7 @@ import sc.plugin2025.Move;
 import sc.plugin2025.Board;
 import sc.plugin2025.Card;
 import sc.plugin2025.Field;
+import sc.plugin2025.GameRuleLogic;
 import sc.plugin2025.GameState;
 import sc.shared.GameResult;
 
@@ -88,6 +89,7 @@ public class Logic implements IGameHandler {
 	  clone.performMoveDirectly(move);
 	  return  clone.getBoard().getField(clone.getOtherPlayer().getPosition());
   }
+  
   public List<Move> Filter(List<Move> Moves , GameState game){
 
 	  for(int i = 0; i < Moves.size(); i++) {
@@ -214,7 +216,12 @@ public class Logic implements IGameHandler {
 	      case MARKET:{
 	    	  
 	    	  if(Karten[0] != Vergleich_Karten[0] ) {   //MARKET EAT_SALAT
-	    		  Floatwert = 0.5f;
+	    		  Floatwert = 0.3f;
+	    		  if(Karten[0] != Vergleich_Karten[0] ) {  
+		    		  if(Karten[0] >= Eigene_Salate) {
+		    			  Floatwert = 0.0f;
+			    	  }
+		    	  }
 	    	  }
 			  if(Karten[1] != Vergleich_Karten[1] ) {   // MARKET SWITCH_CARROTS
 				  Floatwert = 0.0f;  
@@ -229,14 +236,10 @@ public class Logic implements IGameHandler {
 	      }
 	      case SALAD:{
 	    	  
-	    	  if(Eigene_FeldTyp != Voherige_FeldTyp ) {   //SALAT
-	    		  if(Eigene_Position < Gegner_Position ) {   // HARE FALL_BACK 
-	    			  Floatwert = 0.5f;
-	    		  }
-	        	  else {
-	        		  Floatwert = 0.3f;
-	        	  }
+	    	  if(Eigene_FeldTyp != Voherige_FeldTyp ) { 
+	    		  Floatwert = 0.5f; 
 	    	  }
+	        	
 			  if(Eigene_FeldTyp == Voherige_FeldTyp ) {   // EAT_SALAT
 				  Floatwert = 0.0f;  
 			  }
@@ -245,12 +248,7 @@ public class Logic implements IGameHandler {
 	      }
 	      case HARE:{
 	    	  if(Karten[0] != Vergleich_Karten[0] ) {   //HARE EAT_SALAT
-	    		  if(Eigene_Position < Gegner_Position ) {   // HARE FALL_BACK 
-	    			  Floatwert = 1.0f;
-	    		  }
-	        	  else {
-	        		  Floatwert = 0.5f;
-	        	  }
+	    		  Floatwert = 0.5f; 
 	    	  }
 			  if(Karten[1] != Vergleich_Karten[1] ) {   //HARE SWITCH_CARROTS
 				  Floatwert = 0.0f;  
@@ -264,16 +262,16 @@ public class Logic implements IGameHandler {
 	    	  break;
 	      }
 	      case HEDGEHOG:{
-	    	  Floatwert = 0.1f;
+	    	  Floatwert = 0.15f;
 	    	  break;
 	      }
 	      case POSITION_2:{
 	    	  if(Eigene_Position < Gegner_Position ) {    
-				  Floatwert = 0.3f;
+				  Floatwert = 0.2f;
 				  break;
 			  }
 	    	  else {
-	    		  Floatwert = -0.1f;
+	    		  Floatwert = 0.0f;
 	    	  }
 	    	  break;
 	      }
@@ -283,7 +281,7 @@ public class Logic implements IGameHandler {
 				  break;
 			  }
 	    	  else {
-	    		  Floatwert = -0.1f;
+	    		  Floatwert = 0.0f;
 	    	  }
 	    	  break;
 	      }
@@ -303,8 +301,6 @@ public class Logic implements IGameHandler {
 	         GegnerZug = Zug;
 	      }
 		 }
-		  System.out.println(maxValue);
-		  System.out.println(GegnerZug);
        return GegnerZug;
    }
 
@@ -332,13 +328,14 @@ public class Logic implements IGameHandler {
 			  
 			  float Floatwert2 =  Floatwert(Mögliche_Züge2.get(j),GameState2);
 			  
+			  
 			  AlleZüge_Platzhalter[Zähler][0] = Mögliche_Züge.get(i);
 			  AlleZüge_Platzhalter[Zähler][1] = Mögliche_Züge1.get(a);
 			  AlleZüge_Platzhalter[Zähler][2] = Mögliche_Züge2.get(j);
 			  AlleFloat_Platzhalter[Zähler][0] = Floatwert;
 			  AlleFloat_Platzhalter[Zähler][1] = Floatwert1;
 			  AlleFloat_Platzhalter[Zähler][2] = Floatwert2;
-			  AlleFloat_Platzhalter[Zähler][3] = Floatwert + Floatwert1/2 + Floatwert2/3;
+			  AlleFloat_Platzhalter[Zähler][3] =  FloatwertApassug(Floatwert, Floatwert1, Floatwert2 , GameState2 );
 			  Zähler++;
 		  }
 		 }
@@ -429,6 +426,13 @@ public class Logic implements IGameHandler {
   	}
       return Floatwerte; 
   }
+  
+  public float FloatwertApassug(float Float1 ,float Float2, float Float3, GameState game3) {
+	   
+      float Endwert = Float1 + Float2/1.5f +Float3/2f;
+      
+	  return Endwert;
+  }
 
   public float Floatwert(Move Zug , GameState game) {
 	  
@@ -444,23 +448,60 @@ public class Logic implements IGameHandler {
       Field Gegner_FeldTyp = clone.getBoard().getField(clone.getCurrentPlayer().getPosition());
       int[] Karten =  Karten(game.getCurrentPlayer().getCards());
       int[] Vergleich_Karten = Karten(clone.getOtherPlayer().getCards());
+      float V1 = 0.0f;
+      float V2 = 0.0f;
+      float V3 = 0.0f;
+      float V4 = 0.0f;
+      float V5 = 0.0f;
       
       float Floatwert = 0.0f;
+      
+      if(Gegner_Position + GameRuleLogic.INSTANCE.calculateMoveableFields(Gengner_Karroten) > Eigene_Position) {
+    	 V1 = -0.2f;
+      }
+      else {
+    	 V1 = 0.1f;
+      }
+      if(Eigene_Position < Gegner_Position && Gegner_FeldTyp == Field.POSITION_2 ){
+     	 V2 = 0.2f;
+       }
+       else {
+     	 V2 = 0.0f;
+       }
+      if(Gegner_Position - (clone.getBoard().getPreviousField(Field.HEDGEHOG, Gegner_Position) != null ? clone.getBoard().getPreviousField(Field.HEDGEHOG, Gegner_Position) : 0) 
+    		  < Eigene_Position){
+     	 V3 = -0.1f;
+       }
+       else {
+     	 V3 = 0.1f;
+       }
+      if(Eigene_Position > Gegner_Position && Gegner_FeldTyp == Field.POSITION_1 ){
+     	 V4 = 0.2f;
+       }
+       else {
+     	 V4 = 0.0f;
+       }
+      if(Eigene_Salate == 0 && Eigene_FeldTyp != Field.HEDGEHOG){
+      	 V5 = 0.2f + (clone.getOtherPlayer().getPosition() -  game.getOtherPlayer().getPosition())/100f;
+        }
+        else {
+      	 V5 = 0.0f;
+        }
       
       switch(Eigene_FeldTyp) {
       case MARKET:{
     	  
     	  if(Karten[0] != Vergleich_Karten[0] ) {   //MARKET EAT_SALAT
-    		  Floatwert = 0.5f;
+    		  Floatwert = 0.5f + V4 + V2;
     	  }
 		  if(Karten[1] != Vergleich_Karten[1] ) {   // MARKET SWITCH_CARROTS
-			  Floatwert = 0.0f;  
+			  Floatwert = (0.6f - Eigene_Position/130f) - Karten[1] + V4 + V2;  
 		  }
 		  if(Karten[2] != Vergleich_Karten[2] ) {   // MARKET HURRY
-			  Floatwert = 0.0f;
+			  Floatwert = 0.0f + V4 + V2;
 		  }
 		  if(Karten[3] != Vergleich_Karten[3] ) {   // MARKET FALL_BACK 
-			  Floatwert = 0.0f;
+			  Floatwert = 0.0f + V4 + V2;
 		  }
           break;    
       }
@@ -468,10 +509,10 @@ public class Logic implements IGameHandler {
     	  
     	  if(Eigene_FeldTyp != Voherige_FeldTyp ) {   //SALAT
     		  if(Eigene_Position < Gegner_Position ) {   // HARE FALL_BACK 
-    			  Floatwert = 0.5f;
+    			  Floatwert = 1.0f + V2;
     		  }
         	  else {
-        		  Floatwert = 0.3f;
+        		  Floatwert = 0.5f + V4;
         	  }
     	  }
 		  if(Eigene_FeldTyp == Voherige_FeldTyp ) {   // EAT_SALAT
@@ -483,14 +524,14 @@ public class Logic implements IGameHandler {
       case HARE:{
     	  if(Karten[0] != Vergleich_Karten[0] ) {   //HARE EAT_SALAT
     		  if(Eigene_Position < Gegner_Position ) {   // HARE FALL_BACK 
-    			  Floatwert = 1.0f;
+    			  Floatwert = 1.0f + V2;
     		  }
         	  else {
-        		  Floatwert = 0.5f;
+        		  Floatwert = 0.5f + V4;
         	  }
     	  }
 		  if(Karten[1] != Vergleich_Karten[1] ) {   //HARE SWITCH_CARROTS
-			  Floatwert = 0.0f;  
+			  Floatwert = 0.1f + V4 + V2;  
 		  }
 		  if(Karten[2] != Vergleich_Karten[2] ) {   //HARE HURRY
 			  Floatwert = 0.0f;
@@ -501,31 +542,36 @@ public class Logic implements IGameHandler {
     	  break;
       }
       case HEDGEHOG:{
-    	  Floatwert = 0.1f;
+    	  Floatwert = 0.15f + V2;
     	  break;
       }
       case POSITION_2:{
     	  if(Eigene_Position < Gegner_Position ) {    
-			  Floatwert = 0.3f;
+			  Floatwert = 0.2f + V3 + V5;
 			  break;
 		  }
     	  else {
-    		  Floatwert = -0.1f;
+    		  Floatwert = -0.1f + V5;
     	  }
     	  break;
       }
       case POSITION_1:{
     	  if(Eigene_Position > Gegner_Position ) {   
-			  Floatwert = 0.2f;
+			  Floatwert = 0.2f + V1 + V4 + V5;
 			  break;
 		  }
     	  else {
-    		  Floatwert = -0.1f;
+    		  Floatwert = -0.1f + V5;
     	  }
     	  break;
       }
       case CARROTS:{
-    	  Floatwert = 0.1f;
+    	  if(clone.getOtherPlayer().getPosition() ==  game.getOtherPlayer().getPosition()) {
+    		  Floatwert = 0.1f;
+    	  }
+    	  if(clone.getOtherPlayer().getPosition() ==  game.getOtherPlayer().getPosition()) {
+    		  Floatwert = 0.1f + V4 + V2 + V5;
+    	  }
     	  break;
       }
       case GOAL:{
